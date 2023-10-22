@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 import org.documentoviscode.splashyapi.config.DocFormat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 
 @Getter
@@ -25,4 +26,7 @@ public class Document {
     private DocFormat type;
     private String GDriveLink;
     private LocalDate creationDate;
+
+    @ManyToMany
+    private List<User> users;
 }

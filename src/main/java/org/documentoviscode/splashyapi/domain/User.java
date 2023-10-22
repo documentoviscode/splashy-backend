@@ -39,4 +39,5 @@ public class User {
 
     @ManyToMany
     private List<Document> documents;
+
 }
