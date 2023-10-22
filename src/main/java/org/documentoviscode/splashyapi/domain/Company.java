@@ -3,6 +3,7 @@ package org.documentoviscode.splashyapi.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.context.annotation.Scope;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @SuperBuilder
 
 @Entity
+@Scope("singleton")
 @Table(name="Companies")
 public class Company {
     @Id

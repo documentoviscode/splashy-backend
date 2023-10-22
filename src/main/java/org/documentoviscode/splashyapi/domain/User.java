@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.documentoviscode.splashyapi.config.UserRole;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -34,4 +36,7 @@ public class User {
 
     @Column
     private String avatar;
+
+    @ManyToMany
+    private List<Document> documents;
 }
