@@ -1,5 +1,5 @@
 package org.documentoviscode.splashyapi.config;
 
 public enum UserRole {
-    KLIENT, PARTNER, ADMIN
+    CLIENT, PARTNER, ADMIN
 }
