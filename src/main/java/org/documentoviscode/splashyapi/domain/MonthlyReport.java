@@ -14,14 +14,11 @@ public class MonthlyReport extends Document{
     private LocalDate endDate;
 
     @Column
-
     private int viewers;
 
     @Column
-
     private double hoursWatched;
 
     @Column
-
     private double donations;
 }

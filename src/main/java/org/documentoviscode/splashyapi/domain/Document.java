@@ -23,8 +23,14 @@ public class Document {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
+
+    @Column
     private DocFormat type;
+
+    @Column
     private String GDriveLink;
+
+    @Column
     private LocalDate creationDate;
 
     @ManyToMany

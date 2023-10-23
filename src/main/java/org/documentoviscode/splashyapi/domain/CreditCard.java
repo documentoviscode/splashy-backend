@@ -19,9 +19,12 @@ public class CreditCard {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
+    @Column
     private String number;
 
+    @Column
     private String cvc;
 
+    @Column
     private LocalDate expirationDate;
 }

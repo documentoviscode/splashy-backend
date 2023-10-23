@@ -14,7 +14,6 @@ public class Subscription extends Document{
     private int period;
 
     @Column
-
     private double monthlyRate;
 
 }
