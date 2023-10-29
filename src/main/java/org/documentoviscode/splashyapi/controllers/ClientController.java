@@ -17,7 +17,7 @@ import java.util.Optional;
  * Controller handling operations related to clients.
  */
 @RestController
-@RequestMapping("/client")
+@RequestMapping("/clients")
 public class ClientController {
 
     private final ClientService clientService;
@@ -37,7 +37,7 @@ public class ClientController {
      *
      * @return ResponseEntity containing the list of clients or an error response.
      */
-    @GetMapping("/all")
+    @GetMapping("")
     public ResponseEntity<List<Client>> getAllClients() {
         return ResponseEntity.ok(clientService.findAll());
     }
@@ -48,7 +48,7 @@ public class ClientController {
      * @param id The ID of the client.
      * @return ResponseEntity containing the client or an error response if the client is not found.
      */
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Client> getClient(@PathVariable("id") long id) {
         Optional<Client> client = clientService.findClientById(id);
         return client.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());

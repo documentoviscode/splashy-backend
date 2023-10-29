@@ -18,7 +18,7 @@ import java.util.Optional;
  * Controller handling operations related to users.
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -38,7 +38,7 @@ public class UserController {
      *
      * @return ResponseEntity containing the list of users or an error response.
      */
-    @GetMapping("/all")
+    @GetMapping("")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.findAll());
     }
@@ -49,7 +49,7 @@ public class UserController {
      * @param id The ID of the user.
      * @return ResponseEntity containing the user or an error response if the user is not found.
      */
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable("id") long id) {
         Optional<User> user = userService.findUserById(id);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -60,7 +60,7 @@ public class UserController {
      *
      * @return ResponseEntity containing the list of administrators (admins) or an error response.
      */
-    @GetMapping("/admin/all")
+    @GetMapping("/admins")
     public ResponseEntity<List<User>> getAllAdmins() {
         return ResponseEntity.ok(userService.findAllAdmins());
     }
@@ -71,7 +71,7 @@ public class UserController {
      * @param id The ID of the administrator (admin).
      * @return ResponseEntity containing the administrator (admin) or an error response if the administrator is not found.
      */
-    @GetMapping("admin/{id}")
+    @GetMapping("/admins/{id}")
     public ResponseEntity<User> getAdmin(@PathVariable("id") long id) {
         Optional<User> user = userService.findAdminById(id);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
