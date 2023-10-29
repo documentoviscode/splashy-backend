@@ -26,4 +26,12 @@ public class UserService {
     public List<User> findAll() {
         return userRepository.findAll();
     }
+
+    public List<User> findAllAdmins() {
+        return userRepository.findAllAdmins();
+    }
+
+    public Optional<User> findAdminById(Long id) {
+        return userRepository.findAdminById(id);
+    }
 }
