@@ -19,7 +19,7 @@ import java.util.Optional;
  * Controller handling operations related to partners.
  */
 @RestController
-@RequestMapping("/partner")
+@RequestMapping("/partners")
 public class PartnerController {
 
     private final PartnerService partnerService;
@@ -39,7 +39,7 @@ public class PartnerController {
      *
      * @return ResponseEntity containing the list of partners or an error response.
      */
-    @GetMapping("/all")
+    @GetMapping("")
     public ResponseEntity<List<Partner>> getAllPartners() {
         return ResponseEntity.ok(partnerService.findAll());
     }
@@ -50,7 +50,7 @@ public class PartnerController {
      * @param id The ID of the partner.
      * @return ResponseEntity containing the partner or an error response if the partner is not found.
      */
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Partner> getPartner(@PathVariable("id") long id) {
         Optional<Partner> partner = partnerService.findPartnerById(id);
         return partner.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
