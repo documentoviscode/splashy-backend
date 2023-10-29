@@ -15,22 +15,41 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controller handling operations related to partners.
+ */
 @RestController
 @RequestMapping("/partner")
 public class PartnerController {
 
     private final PartnerService partnerService;
 
+    /**
+     * Constructor for the PartnerController class.
+     *
+     * @param partnerService Service handling partner operations.
+     */
     @Autowired
     public PartnerController(PartnerService partnerService) {
         this.partnerService = partnerService;
     }
 
+    /**
+     * Retrieve a list of all partners.
+     *
+     * @return ResponseEntity containing the list of partners or an error response.
+     */
     @GetMapping("/all")
     public ResponseEntity<List<Partner>> getAllPartners() {
         return ResponseEntity.ok(partnerService.findAll());
     }
 
+    /**
+     * Retrieve a partner by a specified ID.
+     *
+     * @param id The ID of the partner.
+     * @return ResponseEntity containing the partner or an error response if the partner is not found.
+     */
     @GetMapping("{id}")
     public ResponseEntity<Partner> getPartner(@PathVariable("id") long id) {
         Optional<Partner> partner = partnerService.findPartnerById(id);
