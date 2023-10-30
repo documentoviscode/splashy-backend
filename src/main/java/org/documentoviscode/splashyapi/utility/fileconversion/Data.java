@@ -1,2 +1,3 @@
-package org.documentoviscode.splashyapi.utility.fileconversion;public class Data {
-}
+package org.documentoviscode.splashyapi.utility.fileconversion;
+
+public abstract class Data {}
