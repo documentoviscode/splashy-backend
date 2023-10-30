@@ -8,7 +8,7 @@ import java.time.LocalDate;
  * Entity class representing partnership agreements.
  */
 @Entity
-@Table(name = "Partnership_Agreements")
+@Table(name = "Partnership_Contracts")
 public class PartnershipContract extends Document {
     /**
      * The start date of the partnership agreement.
