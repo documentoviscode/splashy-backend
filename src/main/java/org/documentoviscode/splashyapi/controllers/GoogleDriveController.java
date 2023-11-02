@@ -1,22 +1,30 @@
 package org.documentoviscode.splashyapi.controllers;
 
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeRequestUrl;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -87,5 +95,33 @@ public class GoogleDriveController {
     private void saveToken(String code) throws Exception {
         GoogleTokenResponse response = flow.newTokenRequest(code).setRedirectUri(CALLBACK_URI).execute();
         flow.createAndStoreCredential(response, USER_IDENTIFIER_KEY);
+    }
+
+    /**
+     * Creates a file in Google Drive based on the provided MultipartFile.
+     *
+     * @param file The MultipartFile to be uploaded and created in Google Drive.
+     * @return The ID of the created file in Google Drive.
+     * @throws Exception If an error occurs while uploading the file to Google Drive.
+     */
+    @PostMapping(value = { "/create" })
+    public String createFile(@RequestParam("file") MultipartFile file) throws Exception {
+        Credential credential = flow.loadCredential(USER_IDENTIFIER_KEY);
+        Drive drive = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).build();
+
+        File fileMetadata = new File();
+        fileMetadata.setName(file.getOriginalFilename());
+        InputStreamContent mediaContent = new InputStreamContent(file.getContentType(), file.getInputStream());
+
+        try {
+            File uploadedFile = drive.files().create(fileMetadata, mediaContent)
+                    .setFields("id")
+                    .execute();
+            System.out.println("File ID: " + uploadedFile.getId());
+            return uploadedFile.getId();
+        } catch (GoogleJsonResponseException e) {
+            System.err.println("Unable to upload file: " + e.getDetails());
+            throw e;
+        }
     }
 }
