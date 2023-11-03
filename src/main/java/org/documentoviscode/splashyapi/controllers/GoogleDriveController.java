@@ -141,8 +141,7 @@ public class GoogleDriveController {
     @GetMapping(value = { "/listfiles" })
     public FileList listFiles() throws Exception {
         Credential cred = flow.loadCredential(USER_IDENTIFIER_KEY);
-        Drive drive = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
-                .setApplicationName("googledrivespringbootexample").build();
+        Drive drive = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred).build();
 
         try {
             FileList fileList = drive.files().list().execute();
