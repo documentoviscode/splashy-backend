@@ -1,5 +1,6 @@
 package org.documentoviscode.splashyapi.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,6 +16,7 @@ import java.time.LocalDate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @SuperBuilder
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "Credit_Cards")
 public class CreditCard {
     /**
