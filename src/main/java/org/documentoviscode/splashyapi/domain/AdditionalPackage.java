@@ -13,7 +13,7 @@ public class AdditionalPackage extends Document {
      * The type of the additional package.
      */
     @Column
-    private String type;
+    private String packageType;
 
     /**
      * The price of the additional package.
