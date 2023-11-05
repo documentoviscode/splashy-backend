@@ -1,5 +1,6 @@
 package org.documentoviscode.splashyapi.services;
 
+import org.documentoviscode.splashyapi.data.requests.PartnershipContractDTO;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.repositories.PartnershipContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,5 +44,27 @@ public class PartnershipContractService {
      */
     public List<PartnershipContract> findAll() {
         return partnershipContractRepository.findAll();
+    }
+
+    /**
+     * Update an existing partnership contract.
+     *
+     * @param id                   The ID of the partnership contract to be updated.
+     * @param updatedContract The updated partnership contract data.
+     * @return The updated partnership contract or null if the contract with the specified ID is not found.
+     */
+    public PartnershipContract updatePartnershipContract(Long id, PartnershipContractDTO updatedContract) {
+        return findPartnershipContractById(id)
+                .map(contractToUpdate -> {
+                    contractToUpdate.setType(updatedContract.type());
+                    contractToUpdate.setGDriveLink(updatedContract.GDriveLink());
+                    contractToUpdate.setCreationDate(updatedContract.creationDate());
+                    contractToUpdate.setStartDate(updatedContract.startDate());
+                    contractToUpdate.setEndDate(updatedContract.endDate());
+                    contractToUpdate.setRate(updatedContract.rate());
+                    contractToUpdate.setDonationPercentage(updatedContract.donationPercentage());
+                    return partnershipContractRepository.save(contractToUpdate);
+                })
+                .orElse(null);
     }
 }

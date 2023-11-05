@@ -1,12 +1,16 @@
 package org.documentoviscode.splashyapi.controllers;
 
 
+import org.documentoviscode.splashyapi.data.requests.SubscriptionDTO;
 import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.services.SubscriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,4 +56,22 @@ public class SubscriptionController {
         Optional<Subscription> subscription = subscriptionService.findSubscriptionById(id);
         return subscription.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    /**
+     * Update an existing subscription based on its ID.
+     *
+     * @param id                    The ID of the subscription to be updated.
+     * @param updatedSubscription    The updated subscription data.
+     * @return A ResponseEntity containing the updated subscription if successful, or a not found status if the subscription with the specified ID is not found.
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<Subscription> updateSubscription(@PathVariable Long id, @RequestBody SubscriptionDTO updatedSubscription) {
+        Subscription updated = subscriptionService.updateSubscription(id, updatedSubscription);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
 }

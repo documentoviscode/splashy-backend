@@ -2,12 +2,16 @@ package org.documentoviscode.splashyapi.controllers;
 
 
 
+import org.documentoviscode.splashyapi.data.requests.AdditionalPackageDTO;
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
 import org.documentoviscode.splashyapi.services.AdditionalPackageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -53,4 +57,22 @@ public class AdditionalPackageController {
         Optional<AdditionalPackage> additionalPackage = additionalPackageService.findAdditionalPackageById(id);
         return additionalPackage.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    /**
+     * Update an existing additional package based on its ID.
+     *
+     * @param id                       The ID of the additional package to be updated.
+     * @param updatedAdditionalPackage  The updated additional package data.
+     * @return A ResponseEntity containing the updated additional package if successful, or a not found status if the package with the specified ID is not found.
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<AdditionalPackage> updateAdditionalPackage(@PathVariable Long id, @RequestBody AdditionalPackageDTO updatedAdditionalPackage) {
+        AdditionalPackage updated = additionalPackageService.updateAdditionalPackage(id, updatedAdditionalPackage);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

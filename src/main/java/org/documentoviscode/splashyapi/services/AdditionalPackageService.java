@@ -1,5 +1,6 @@
 package org.documentoviscode.splashyapi.services;
 
+import org.documentoviscode.splashyapi.data.requests.AdditionalPackageDTO;
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
 import org.documentoviscode.splashyapi.repositories.AdditionalPackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,4 +44,25 @@ public class AdditionalPackageService {
     public List<AdditionalPackage> findAll() {
         return additionalPackageRepository.findAll();
     }
+
+    /**
+     * Update an existing additional package.
+     *
+     * @param id                     The ID of the additional package to be updated.
+     * @param updatedAdditionalPackage The updated additional package data.
+     * @return The updated additional package or null if the package with the specified ID is not found.
+     */
+    public AdditionalPackage updateAdditionalPackage(Long id, AdditionalPackageDTO updatedAdditionalPackage) {
+        return findAdditionalPackageById(id)
+                .map(packageToUpdate -> {
+                    packageToUpdate.setPackageType(updatedAdditionalPackage.packageType());
+                    packageToUpdate.setGDriveLink(updatedAdditionalPackage.GDriveLink());
+                    packageToUpdate.setCreationDate(updatedAdditionalPackage.creationDate());
+                    packageToUpdate.setPackageType(updatedAdditionalPackage.packageType());
+                    packageToUpdate.setPrice(updatedAdditionalPackage.price());
+                    return additionalPackageRepository.save(packageToUpdate);
+                })
+                .orElse(null);
+    }
+
 }

@@ -1,5 +1,6 @@
 package org.documentoviscode.splashyapi.services;
 
+import org.documentoviscode.splashyapi.data.requests.MonthlyReportDTO;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
 import org.documentoviscode.splashyapi.repositories.MonthlyReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,4 +44,28 @@ public class MonthlyReportService {
     public List<MonthlyReport> findAll() {
         return monthlyReportRepository.findAll();
     }
+
+    /**
+     * Update an existing monthly report.
+     *
+     * @param id                The ID of the monthly report to be updated.
+     * @param updatedMonthlyReport The updated monthly report data.
+     * @return The updated monthly report or null if the monthly report with the specified ID is not found.
+     */
+    public MonthlyReport updateMonthlyReport(Long id, MonthlyReportDTO updatedMonthlyReport) {
+        return findMonthlyReportById(id)
+                .map(monthlyReportToUpdate -> {
+                    monthlyReportToUpdate.setType(updatedMonthlyReport.type());
+                    monthlyReportToUpdate.setGDriveLink(updatedMonthlyReport.GDriveLink());
+                    monthlyReportToUpdate.setCreationDate(updatedMonthlyReport.creationDate());
+                    monthlyReportToUpdate.setStartDate(updatedMonthlyReport.startDate());
+                    monthlyReportToUpdate.setEndDate(updatedMonthlyReport.endDate());
+                    monthlyReportToUpdate.setViewers(updatedMonthlyReport.viewers());
+                    monthlyReportToUpdate.setHoursWatched(updatedMonthlyReport.hoursWatched());
+                    monthlyReportToUpdate.setDonations(updatedMonthlyReport.donations());
+                    return monthlyReportRepository.save(monthlyReportToUpdate);
+                })
+                .orElse(null);
+    }
+
 }
