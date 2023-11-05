@@ -2,6 +2,7 @@ package org.documentoviscode.splashyapi.utility.fileconversion;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.documentoviscode.splashyapi.config.DocFormat;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -9,10 +10,7 @@ import org.json.simple.parser.ParseException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class Document {
@@ -20,10 +18,18 @@ public class Document {
     private DocFormat format;
 
     public static Boolean[][] conversionMatrix = {
-        {false, false, false}, // CSV  -> { CSV, JSON, PDF }
+        {false, true, false}, // CSV  -> { CSV, JSON, PDF }
         {false, false, false}, // JSON -> { CSV, JSON, PDF }
         {false, false, false}  // PDF  -> { CSV, JSON, PDF }
     };
+
+
+    public Document() {
+        this.data = null;
+    }
+    public Document(Data data) {
+        this.data = data;
+    }
 
     public void readFrom(String filename) {
         if (filename.endsWith(".csv")) {
@@ -39,6 +45,7 @@ public class Document {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            this.format = DocFormat.CSV;
         }
         else if (filename.endsWith(".json")) {
             DataJSON readData = new DataJSON();
@@ -50,6 +57,7 @@ public class Document {
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
             }
+            this.format = DocFormat.JSON;
         }
         else throw new NotImplementedException();
     }
@@ -64,6 +72,25 @@ public class Document {
         }
 
         if (!canCovert) throw new NotImplementedException();
+
+        if (this.format == DocFormat.CSV) {
+            if (format == DocFormat.JSON) {
+                DataCSV dataCSV = (DataCSV) this.data;
+                DataJSON dataJSON = new DataJSON();
+
+                JSONArray items = new JSONArray();
+                for (int i = 1; i < dataCSV.getRows().size(); i++) {
+                    JSONObject item = new JSONObject();
+                    for (int j = 0; j < dataCSV.getRows().get(0).size(); j++) {
+                        item.put(dataCSV.getRows().get(0).get(j), dataCSV.getRows().get(i).get(j));
+                    }
+                    items.add(item);
+                }
+                dataJSON.getKeys().put("items", items);
+
+                return new Document(dataJSON);
+            }
+        }
         return new Document();
     }
 

@@ -6,6 +6,12 @@ import java.util.List;
 public class DataCSV extends Data {
     private List<List<String>> rows = new ArrayList<>();
 
+    public DataCSV() {}
+
+    public DataCSV(List<List<String>> rows) {
+        this.rows = rows;
+    }
+
     public List<List<String>> getRows() {
         return rows;
     }
