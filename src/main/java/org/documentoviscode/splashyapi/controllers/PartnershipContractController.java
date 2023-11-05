@@ -56,6 +56,13 @@ public class PartnershipContractController {
         return partnershipContract.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Create a new PartnershipContract for a specified user.
+     *
+     * @param newPartnershipContract The partnership contract to be created.
+     * @param userId          The ID of the user for whom the partnership contract is created.
+     * @return ResponseEntity containing the created partnership contract and HTTP status.
+     */
     @PostMapping
     public ResponseEntity<PartnershipContract> createPartnershipContract(@RequestBody PartnershipContract newPartnershipContract, @RequestParam Long userId )
     {

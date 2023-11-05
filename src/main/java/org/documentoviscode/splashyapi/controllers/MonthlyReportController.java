@@ -56,6 +56,13 @@ public class MonthlyReportController {
         return monthlyReport.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Create a new MonthlyReport for a specified user.
+     *
+     * @param newMonthlyReport The monthly record to be created.
+     * @param userId          The ID of the user for whom the monthly record is created.
+     * @return ResponseEntity containing the created monthly record and HTTP status.
+     */
     @PostMapping
     public ResponseEntity<MonthlyReport> createMonthlyReport(@RequestBody MonthlyReport newMonthlyReport, @RequestParam Long userId )
     {

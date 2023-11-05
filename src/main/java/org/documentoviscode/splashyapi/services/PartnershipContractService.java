@@ -47,6 +47,12 @@ public class PartnershipContractService {
         return partnershipContractRepository.findAll();
     }
 
+    /**
+     * Create a new partnership contract by saving it to the repository.
+     *
+     * @param partnershipContract The partnership contract to be created.
+     * @return The created partnership contract.
+     */
     @Transactional
     public PartnershipContract create(PartnershipContract partnershipContract) {
 

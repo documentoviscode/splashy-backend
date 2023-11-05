@@ -55,6 +55,13 @@ public class SubscriptionController {
         return subscription.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Create a new subscription for a specified user.
+     *
+     * @param newSubscription The subscription to be created.
+     * @param userId          The ID of the user for whom the subscription is created.
+     * @return ResponseEntity containing the created subscription and HTTP status.
+     */
     @PostMapping
     public ResponseEntity<Subscription> createSubscription(@RequestBody Subscription newSubscription, @RequestParam Long userId)
     {

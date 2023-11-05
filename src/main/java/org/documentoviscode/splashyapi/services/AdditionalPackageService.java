@@ -46,6 +46,12 @@ public class AdditionalPackageService {
         return additionalPackageRepository.findAll();
     }
 
+    /**
+     * Create a new additional package by saving it to the repository.
+     *
+     * @param additionalPackage The additional package to be created.
+     * @return The created additional package.
+     */
     @Transactional
     public AdditionalPackage create(AdditionalPackage additionalPackage)
     {

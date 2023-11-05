@@ -57,7 +57,13 @@ public class AdditionalPackageController {
         return additionalPackage.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
+    /**
+     * Create a new AdditionalPackage for a specified user.
+     *
+     * @param newAdditionalPackage The additional package to be created.
+     * @param userId          The ID of the user for whom the additional package is created.
+     * @return ResponseEntity containing the created additional package and HTTP status.
+     */
     @PostMapping
     public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody AdditionalPackage newAdditionalPackage, @RequestParam Long userId )
     {

@@ -45,6 +45,12 @@ public class SubscriptionService {
         return subscriptionRepository.findAll();
     }
 
+    /**
+     * Create a new subscription by saving it to the repository.
+     *
+     * @param subscription The subscription to be created.
+     * @return The created subscription.
+     */
     @Transactional
     public Subscription create(Subscription subscription)
     {

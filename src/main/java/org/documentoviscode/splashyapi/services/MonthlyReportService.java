@@ -46,6 +46,12 @@ public class MonthlyReportService {
         return monthlyReportRepository.findAll();
     }
 
+    /**
+     * Create a new monthly report by saving it to the repository.
+     *
+     * @param monthlyReport The monthly report to be created.
+     * @return The created monthly report.
+     */
     @Transactional
     public MonthlyReport create(MonthlyReport monthlyReport) {
 
