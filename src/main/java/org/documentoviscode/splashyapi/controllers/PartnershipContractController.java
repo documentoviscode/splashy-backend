@@ -3,7 +3,9 @@ package org.documentoviscode.splashyapi.controllers;
 
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.services.PartnershipContractService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @RequestMapping("/partnershipContracts")
 public class PartnershipContractController {
     private final PartnershipContractService partnershipContractService;
+    private final UserService userService;
 
     /**
      * Constructor for the PartnershipContractController class.
@@ -26,8 +29,9 @@ public class PartnershipContractController {
      * @param partnershipContractService The service for managing partnership contract-related operations.
      */
     @Autowired
-    public PartnershipContractController(PartnershipContractService partnershipContractService) {
+    public PartnershipContractController(PartnershipContractService partnershipContractService, UserService userService) {
         this.partnershipContractService = partnershipContractService;
+        this.userService = userService;
     }
 
     /**
@@ -53,17 +57,26 @@ public class PartnershipContractController {
     }
 
     @PostMapping
-    public ResponseEntity<PartnershipContract> createPartnershipContract(@RequestBody PartnershipContract newPartnershipContract )
+    public ResponseEntity<PartnershipContract> createPartnershipContract(@RequestBody PartnershipContract newPartnershipContract, @RequestParam Long userId )
     {
-        PartnershipContract createdPartnershipContract = partnershipContractService.create(newPartnershipContract);
+        Optional<User> userOptional = userService.findUserById(userId);
 
-        if(createdPartnershipContract!=null)
+        if(userOptional.isPresent())
         {
-            return new ResponseEntity<>(createdPartnershipContract, HttpStatus.CREATED);
+            newPartnershipContract.setUser(userOptional.get());
+            PartnershipContract createdPartnershipContract = partnershipContractService.create(newPartnershipContract);
+
+            if(createdPartnershipContract!=null)
+            {
+                return new ResponseEntity<>(createdPartnershipContract, HttpStatus.CREATED);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
-        else
-        {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

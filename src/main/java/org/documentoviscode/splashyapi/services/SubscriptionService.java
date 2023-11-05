@@ -48,12 +48,6 @@ public class SubscriptionService {
     @Transactional
     public Subscription create(Subscription subscription)
     {
-        Optional<Subscription> subOptional = subscriptionRepository.findById(subscription.getId());
-
-        if(subOptional.isPresent())
-        {
-            throw new IllegalStateException("Id already taken");
-        }
         return subscriptionRepository.save(subscription);
     }
 }

@@ -3,7 +3,9 @@ package org.documentoviscode.splashyapi.controllers;
 
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.services.MonthlyReportService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.Optional;
 @RequestMapping("/monthlyReports")
 public class MonthlyReportController {
     private final MonthlyReportService monthlyReportService;
+    private final UserService userService;
 
     /**
      * Constructor for the MonthlyReportController class.
@@ -26,8 +29,9 @@ public class MonthlyReportController {
      * @param monthlyReportService The service for managing monthly report-related operations.
      */
     @Autowired
-    public MonthlyReportController(MonthlyReportService monthlyReportService) {
+    public MonthlyReportController(MonthlyReportService monthlyReportService, UserService userService) {
         this.monthlyReportService = monthlyReportService;
+        this.userService = userService;
     }
 
     /**
@@ -53,17 +57,25 @@ public class MonthlyReportController {
     }
 
     @PostMapping
-    public ResponseEntity<MonthlyReport> createMonthlyReport(@RequestBody MonthlyReport newMonthlyReport )
+    public ResponseEntity<MonthlyReport> createMonthlyReport(@RequestBody MonthlyReport newMonthlyReport, @RequestParam Long userId )
     {
-        MonthlyReport createdMonthlyReport = monthlyReportService.create(newMonthlyReport);
+        Optional<User> userOptional = userService.findUserById(userId);
 
-        if(createdMonthlyReport!=null)
+        if(userOptional.isPresent())
         {
-            return new ResponseEntity<>(createdMonthlyReport, HttpStatus.CREATED);
+            newMonthlyReport.setUser(userOptional.get());
+            MonthlyReport createdMonthlyReport = monthlyReportService.create(newMonthlyReport);
+            if(createdMonthlyReport!=null)
+            {
+                return new ResponseEntity<>(createdMonthlyReport, HttpStatus.CREATED);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
-        else
-        {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

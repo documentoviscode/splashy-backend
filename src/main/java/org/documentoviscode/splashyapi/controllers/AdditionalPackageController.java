@@ -4,7 +4,9 @@ package org.documentoviscode.splashyapi.controllers;
 
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.services.AdditionalPackageService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import java.util.Optional;
 @RequestMapping("/additionalPackages")
 public class AdditionalPackageController {
     private final AdditionalPackageService additionalPackageService;
+    private final UserService userService;
 
     /**
      * Constructor for the AdditionalPackageController class.
@@ -27,8 +30,9 @@ public class AdditionalPackageController {
      * @param additionalPackageService The service for managing additional package-related operations.
      */
     @Autowired
-    public AdditionalPackageController(AdditionalPackageService additionalPackageService) {
+    public AdditionalPackageController(AdditionalPackageService additionalPackageService, UserService userService) {
         this.additionalPackageService = additionalPackageService;
+        this.userService = userService;
     }
 
     /**
@@ -53,20 +57,28 @@ public class AdditionalPackageController {
         return additionalPackage.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+
     @PostMapping
-    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody AdditionalPackage newAdditionalPackage )
+    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody AdditionalPackage newAdditionalPackage, @RequestParam Long userId )
     {
-        AdditionalPackage createdAdditionalPackage = additionalPackageService.create(newAdditionalPackage);
+        Optional<User> userOptional = userService.findUserById(userId);
 
-        if(createdAdditionalPackage!=null)
+        if(userOptional.isPresent())
         {
-            return new ResponseEntity<>(createdAdditionalPackage, HttpStatus.CREATED);
+            newAdditionalPackage.setUser(userOptional.get());
+            AdditionalPackage createdAdditionalPackage = additionalPackageService.create(newAdditionalPackage);
+            if(createdAdditionalPackage!=null)
+            {
+                return new ResponseEntity<>(createdAdditionalPackage, HttpStatus.CREATED);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
-        else
-        {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
     }
-
-
 }

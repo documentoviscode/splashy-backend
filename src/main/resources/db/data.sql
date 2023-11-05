@@ -26,6 +26,7 @@ VALUES  (1,0,'<GLinkDrive1>','2023-10-29'),
         (2,0,'<GLinkDrive2>','2023-10-28'),
         (3,0,'<GLinkDrive3>','2023-10-27');*/
 
+/*
 INSERT INTO Partnership_Contracts(id, type, GDrive_Link, creation_date,start_date,end_date,rate,donation_percentage)
 VALUES  (4,0,'<GLinkDrive4>','2023-10-29','2023-10-30','2023-11-29',1.0,69),
         (5,0,'<GLinkDrive5>','2023-10-28','2023-11-01','2023-11-29',0.9,10),
@@ -46,4 +47,4 @@ VALUES  (13,2,'<GLinkDrive13>','2023-01-01','2023-09-01','2023-09-30',1111,45649
         (14,3,'<GLinkDrive14>','2023-10-01','2023-09-01','2023-09-30',20332,123333.3,3455),
         (15,4,'<GLinkDrive15>','2023-10-01','2023-09-01','2023-09-30',2137,69000.5,666);
 
-
+*/

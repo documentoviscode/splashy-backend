@@ -49,12 +49,6 @@ public class AdditionalPackageService {
     @Transactional
     public AdditionalPackage create(AdditionalPackage additionalPackage)
     {
-        Optional<AdditionalPackage> optional = additionalPackageRepository.findById(additionalPackage.getId());
-
-        if(optional.isPresent())
-        {
-            throw new IllegalStateException("Id already taken");
-        }
         return additionalPackageRepository.save(additionalPackage);
     }
 }

@@ -49,12 +49,7 @@ public class PartnershipContractService {
 
     @Transactional
     public PartnershipContract create(PartnershipContract partnershipContract) {
-        Optional<PartnershipContract> subOptional = partnershipContractRepository.findById(partnershipContract.getId());
 
-        if(subOptional.isPresent())
-        {
-            throw new IllegalStateException("Id already taken");
-        }
         return partnershipContractRepository.save(partnershipContract);
     }
 }

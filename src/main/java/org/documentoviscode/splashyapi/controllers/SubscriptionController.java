@@ -2,7 +2,9 @@ package org.documentoviscode.splashyapi.controllers;
 
 
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.services.SubscriptionService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.Optional;
 @RequestMapping("/subscriptions")
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
+    private final UserService userService;
 
     /**
      * Constructor for the SubscriptionController class.
@@ -25,8 +28,9 @@ public class SubscriptionController {
      * @param subscriptionService The service for managing subscription-related operations.
      */
     @Autowired
-    public SubscriptionController(SubscriptionService subscriptionService) {
+    public SubscriptionController(SubscriptionService subscriptionService, UserService userService) {
         this.subscriptionService = subscriptionService;
+        this.userService = userService;
     }
 
     /**
@@ -52,17 +56,28 @@ public class SubscriptionController {
     }
 
     @PostMapping
-    public ResponseEntity<Subscription> createSubscription(@RequestBody Subscription newSubscription )
+    public ResponseEntity<Subscription> createSubscription(@RequestBody Subscription newSubscription, @RequestParam Long userId)
     {
-        Subscription createdSubscription = subscriptionService.create(newSubscription);
+        Optional<User> userOptional = userService.findUserById(userId);
 
-        if(createdSubscription!=null)
+        if(userOptional.isPresent())
         {
-            return new ResponseEntity<>(createdSubscription, HttpStatus.CREATED);
+            newSubscription.setUser(userOptional.get());
+            Subscription createdSubscription = subscriptionService.create(newSubscription);
+
+            if(createdSubscription!=null)
+            {
+                return new ResponseEntity<>(createdSubscription, HttpStatus.CREATED);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
         }
-        else
-        {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
     }
 }

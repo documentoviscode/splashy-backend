@@ -1,6 +1,7 @@
 package org.documentoviscode.splashyapi.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -63,6 +64,7 @@ public class User {
     /**
      * The list of documents associated with the user.
      */
-    @ManyToMany
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Document> documents;
 }

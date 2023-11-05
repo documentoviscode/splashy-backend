@@ -1,6 +1,7 @@
 package org.documentoviscode.splashyapi.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
@@ -29,7 +30,7 @@ public class Document {
      * The unique identifier for the document.
      */
     @Id
-    //@GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     /**
@@ -53,8 +54,8 @@ public class Document {
     /**
      * The list of users associated with the document.
      */
-    @ManyToMany
-    @JsonIgnore
-    private List<User> users;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonBackReference
+    private User user;
 
 }

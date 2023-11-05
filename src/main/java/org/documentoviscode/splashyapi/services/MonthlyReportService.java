@@ -49,12 +49,6 @@ public class MonthlyReportService {
     @Transactional
     public MonthlyReport create(MonthlyReport monthlyReport) {
 
-        Optional<MonthlyReport> optional = monthlyReportRepository.findById(monthlyReport.getId());
-
-        if(optional.isPresent())
-        {
-            throw new IllegalStateException("Id already taken");
-        }
         return monthlyReportRepository.save(monthlyReport);
 
     }
