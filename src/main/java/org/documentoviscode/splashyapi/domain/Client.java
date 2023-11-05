@@ -1,5 +1,6 @@
 package org.documentoviscode.splashyapi.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -16,6 +17,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @ToString
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Table(name = "Clients")
 public class Client extends User {
 
