@@ -1,9 +1,11 @@
 package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
+import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.AdditionalPackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,5 +44,17 @@ public class AdditionalPackageService {
      */
     public List<AdditionalPackage> findAll() {
         return additionalPackageRepository.findAll();
+    }
+
+    @Transactional
+    public AdditionalPackage create(AdditionalPackage additionalPackage)
+    {
+        Optional<AdditionalPackage> optional = additionalPackageRepository.findById(additionalPackage.getId());
+
+        if(optional.isPresent())
+        {
+            throw new IllegalStateException("Id already taken");
+        }
+        return additionalPackageRepository.save(additionalPackage);
     }
 }

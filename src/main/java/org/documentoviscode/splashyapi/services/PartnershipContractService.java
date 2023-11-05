@@ -1,9 +1,11 @@
 package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
+import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.PartnershipContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,5 +45,16 @@ public class PartnershipContractService {
      */
     public List<PartnershipContract> findAll() {
         return partnershipContractRepository.findAll();
+    }
+
+    @Transactional
+    public PartnershipContract create(PartnershipContract partnershipContract) {
+        Optional<PartnershipContract> subOptional = partnershipContractRepository.findById(partnershipContract.getId());
+
+        if(subOptional.isPresent())
+        {
+            throw new IllegalStateException("Id already taken");
+        }
+        return partnershipContractRepository.save(partnershipContract);
     }
 }

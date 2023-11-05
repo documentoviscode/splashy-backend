@@ -3,13 +3,12 @@ package org.documentoviscode.splashyapi.controllers;
 
 
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
+import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.services.AdditionalPackageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,4 +52,21 @@ public class AdditionalPackageController {
         Optional<AdditionalPackage> additionalPackage = additionalPackageService.findAdditionalPackageById(id);
         return additionalPackage.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PostMapping
+    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody AdditionalPackage newAdditionalPackage )
+    {
+        AdditionalPackage createdAdditionalPackage = additionalPackageService.create(newAdditionalPackage);
+
+        if(createdAdditionalPackage!=null)
+        {
+            return new ResponseEntity<>(createdAdditionalPackage, HttpStatus.CREATED);
+        }
+        else
+        {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }

@@ -1,9 +1,11 @@
 package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
+import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.MonthlyReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,5 +44,18 @@ public class MonthlyReportService {
      */
     public List<MonthlyReport> findAll() {
         return monthlyReportRepository.findAll();
+    }
+
+    @Transactional
+    public MonthlyReport create(MonthlyReport monthlyReport) {
+
+        Optional<MonthlyReport> optional = monthlyReportRepository.findById(monthlyReport.getId());
+
+        if(optional.isPresent())
+        {
+            throw new IllegalStateException("Id already taken");
+        }
+        return monthlyReportRepository.save(monthlyReport);
+
     }
 }
