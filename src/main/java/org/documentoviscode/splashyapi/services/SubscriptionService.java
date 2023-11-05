@@ -4,6 +4,7 @@ import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.SubscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,5 +43,17 @@ public class SubscriptionService {
      */
     public List<Subscription> findAll() {
         return subscriptionRepository.findAll();
+    }
+
+    @Transactional
+    public Subscription create(Subscription subscription)
+    {
+        Optional<Subscription> subOptional = subscriptionRepository.findById(subscription.getId());
+
+        if(subOptional.isPresent())
+        {
+            throw new IllegalStateException("Id already taken");
+        }
+        return subscriptionRepository.save(subscription);
     }
 }

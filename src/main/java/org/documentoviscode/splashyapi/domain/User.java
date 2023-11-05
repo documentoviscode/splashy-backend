@@ -1,5 +1,6 @@
 package org.documentoviscode.splashyapi.domain;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -18,6 +19,7 @@ import java.util.List;
 @SuperBuilder
 @ToString
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Table(name = "Users")
 public class User {

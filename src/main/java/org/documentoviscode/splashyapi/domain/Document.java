@@ -1,6 +1,8 @@
 package org.documentoviscode.splashyapi.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -19,6 +21,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @SuperBuilder
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Table(name = "Documents")
 public class Document {
@@ -26,7 +29,7 @@ public class Document {
      * The unique identifier for the document.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    //@GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     /**
@@ -51,6 +54,7 @@ public class Document {
      * The list of users associated with the document.
      */
     @ManyToMany
+    @JsonIgnore
     private List<User> users;
 
 }
