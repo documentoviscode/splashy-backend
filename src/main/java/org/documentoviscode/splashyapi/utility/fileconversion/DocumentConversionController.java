@@ -96,7 +96,7 @@ public class DocumentConversionController{
 
         document.close();
 
-        new File(reportPath + reportFileName).delete();
+//        new File(reportPath + reportFileName).delete();
         return reportFileName;
     }
 
@@ -112,28 +112,8 @@ public class DocumentConversionController{
 
         Document jsonDoc = new Document();
         jsonDoc.readFrom(reportPath + downloadedFileName);
-
-        Map<String, Object> map = Map.of(
-                "id", 0,
-                "type", "PDF",
-                "creationDate", "2023-11-05",
-                "users", List.of(Map.of("id", 0,
-                        "name", "string",
-                        "surname", "string",
-                        "email", "string",
-                        "role", "CLIENT",
-                        "avatar", "string",
-                        "documents", "String"
-                ), ""),
-                "startDate", "2023-11-05",
-                "endDate", "2023-11-05",
-                "viewers", 0,
-                "hoursWatched", 0,
-                "donations", 0,
-                "gdriveLink", "string");
-
-        JSONObject data = new JSONObject(map);
-//        downloaded.delete();
+        JSONObject data = ((DataJSON)jsonDoc.getData()).getKeys();
+        downloaded.delete();
 
         JSONObject partner = new JSONObject(((List<Map>) data.get("users")).get(0));
         String reportFileName = "monthlyReport_" + partner.get("id") + "_" + data.get("creationDate") + ".docx";
