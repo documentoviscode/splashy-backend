@@ -4,13 +4,16 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import org.documentoviscode.splashyapi.controllers.GoogleDriveController;
+import org.documentoviscode.splashyapi.data.CustomMultipartFile;
 import org.json.simple.JSONObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -24,7 +27,7 @@ public class DocumentConversionController{
         this.applicationContext = applicationContext;
     }
 
-    public String generateMonthlyReportPDF(String fileId) throws IOException, DocumentException {
+    public String generateMonthlyReportPDF(String fileId) throws Exception {
         String reportPath = "src/main/resources/";
         String downloadedFileName = "downloaded.json";
 
@@ -44,7 +47,8 @@ public class DocumentConversionController{
         String reportFileName = "monthlyReport_" + partner.get("id") + "_" + data.get("creationDate") + ".pdf";
 
         com.itextpdf.text.Document document = new com.itextpdf.text.Document();
-        PdfWriter.getInstance(document, new FileOutputStream(reportPath + reportFileName));
+        FileOutputStream outputStream = new FileOutputStream(reportPath + reportFileName);
+        PdfWriter.getInstance(document, outputStream);
 
         Font fontHeader1 = FontFactory.getFont(FontFactory.HELVETICA, 32, BaseColor.BLACK);
         Font fontHeader2 = FontFactory.getFont(FontFactory.HELVETICA, 24, BaseColor.BLACK);
@@ -86,8 +90,10 @@ public class DocumentConversionController{
         document.add(copyright);
 
         document.close();
+        outputStream.close();
 
-//        new File(reportPath + reportFileName).delete();
+        controller.createFile(new CustomMultipartFile(Paths.get(reportPath + reportFileName)));
+        new File(reportPath + reportFileName).delete();
         return reportFileName;
     }
 }
