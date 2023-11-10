@@ -55,17 +55,34 @@ public class MonthlyReportService {
     public MonthlyReport updateMonthlyReport(Long id, MonthlyReportDTO updatedMonthlyReport) {
         return findMonthlyReportById(id)
                 .map(monthlyReportToUpdate -> {
-                    monthlyReportToUpdate.setType(updatedMonthlyReport.type());
-                    monthlyReportToUpdate.setGDriveLink(updatedMonthlyReport.GDriveLink());
-                    monthlyReportToUpdate.setCreationDate(updatedMonthlyReport.creationDate());
-                    monthlyReportToUpdate.setStartDate(updatedMonthlyReport.startDate());
-                    monthlyReportToUpdate.setEndDate(updatedMonthlyReport.endDate());
-                    monthlyReportToUpdate.setViewers(updatedMonthlyReport.viewers());
-                    monthlyReportToUpdate.setHoursWatched(updatedMonthlyReport.hoursWatched());
-                    monthlyReportToUpdate.setDonations(updatedMonthlyReport.donations());
+                    if (updatedMonthlyReport.getType() != null) {
+                        monthlyReportToUpdate.setType(updatedMonthlyReport.getType());
+                    }
+                    if (updatedMonthlyReport.getGDriveLink() != null) {
+                        monthlyReportToUpdate.setGDriveLink(updatedMonthlyReport.getGDriveLink());
+                    }
+                    if (updatedMonthlyReport.getCreationDate() != null) {
+                        monthlyReportToUpdate.setCreationDate(updatedMonthlyReport.getCreationDate());
+                    }
+                    if (updatedMonthlyReport.getStartDate() != null) {
+                        monthlyReportToUpdate.setStartDate(updatedMonthlyReport.getStartDate());
+                    }
+                    if (updatedMonthlyReport.getEndDate() != null) {
+                        monthlyReportToUpdate.setEndDate(updatedMonthlyReport.getEndDate());
+                    }
+                    if (updatedMonthlyReport.getViewers() != null) {
+                        monthlyReportToUpdate.setViewers(updatedMonthlyReport.getViewers());
+                    }
+                    if (updatedMonthlyReport.getHoursWatched() != null) {
+                        monthlyReportToUpdate.setHoursWatched(updatedMonthlyReport.getHoursWatched());
+                    }
+                    if (updatedMonthlyReport.getDonations() != null) {
+                        monthlyReportToUpdate.setDonations(updatedMonthlyReport.getDonations());
+                    }
                     return monthlyReportRepository.save(monthlyReportToUpdate);
                 })
                 .orElse(null);
+
     }
 
 }

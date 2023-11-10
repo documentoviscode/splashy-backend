@@ -56,15 +56,30 @@ public class PartnershipContractService {
     public PartnershipContract updatePartnershipContract(Long id, PartnershipContractDTO updatedContract) {
         return findPartnershipContractById(id)
                 .map(contractToUpdate -> {
-                    contractToUpdate.setType(updatedContract.type());
-                    contractToUpdate.setGDriveLink(updatedContract.GDriveLink());
-                    contractToUpdate.setCreationDate(updatedContract.creationDate());
-                    contractToUpdate.setStartDate(updatedContract.startDate());
-                    contractToUpdate.setEndDate(updatedContract.endDate());
-                    contractToUpdate.setRate(updatedContract.rate());
-                    contractToUpdate.setDonationPercentage(updatedContract.donationPercentage());
+                    if (updatedContract.getType() != null) {
+                        contractToUpdate.setType(updatedContract.getType());
+                    }
+                    if (updatedContract.getGDriveLink() != null) {
+                        contractToUpdate.setGDriveLink(updatedContract.getGDriveLink());
+                    }
+                    if (updatedContract.getCreationDate() != null) {
+                        contractToUpdate.setCreationDate(updatedContract.getCreationDate());
+                    }
+                    if (updatedContract.getStartDate() != null) {
+                        contractToUpdate.setStartDate(updatedContract.getStartDate());
+                    }
+                    if (updatedContract.getEndDate() != null) {
+                        contractToUpdate.setEndDate(updatedContract.getEndDate());
+                    }
+                    if (updatedContract.getRate() != null) {
+                        contractToUpdate.setRate(updatedContract.getRate());
+                    }
+                    if (updatedContract.getDonationPercentage() != null) {
+                        contractToUpdate.setDonationPercentage(updatedContract.getDonationPercentage());
+                    }
                     return partnershipContractRepository.save(contractToUpdate);
                 })
                 .orElse(null);
+
     }
 }

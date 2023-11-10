@@ -55,14 +55,23 @@ public class AdditionalPackageService {
     public AdditionalPackage updateAdditionalPackage(Long id, AdditionalPackageDTO updatedAdditionalPackage) {
         return findAdditionalPackageById(id)
                 .map(packageToUpdate -> {
-                    packageToUpdate.setPackageType(updatedAdditionalPackage.packageType());
-                    packageToUpdate.setGDriveLink(updatedAdditionalPackage.GDriveLink());
-                    packageToUpdate.setCreationDate(updatedAdditionalPackage.creationDate());
-                    packageToUpdate.setPackageType(updatedAdditionalPackage.packageType());
-                    packageToUpdate.setPrice(updatedAdditionalPackage.price());
+                    if (updatedAdditionalPackage.getPackageType() != null) {
+                        packageToUpdate.setPackageType(updatedAdditionalPackage.getPackageType());
+                    }
+                    if (updatedAdditionalPackage.getGDriveLink() != null) {
+                        packageToUpdate.setGDriveLink(updatedAdditionalPackage.getGDriveLink());
+                    }
+                    if (updatedAdditionalPackage.getCreationDate() != null) {
+                        packageToUpdate.setCreationDate(updatedAdditionalPackage.getCreationDate());
+                    }
+                    if (updatedAdditionalPackage.getPackageType() != null) {
+                        packageToUpdate.setPackageType(updatedAdditionalPackage.getPackageType());
+                    }
+                    if (updatedAdditionalPackage.getPrice() != null) {
+                        packageToUpdate.setPrice(updatedAdditionalPackage.getPrice());
+                    }
                     return additionalPackageRepository.save(packageToUpdate);
                 })
                 .orElse(null);
     }
-
 }

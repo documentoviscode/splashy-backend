@@ -55,14 +55,27 @@ public class SubscriptionService {
     public Subscription updateSubscription(Long id, SubscriptionDTO updatedSubscription) {
         return findSubscriptionById(id)
                 .map(subscriptionToUpdate -> {
-                    subscriptionToUpdate.setType(updatedSubscription.type());
-                    subscriptionToUpdate.setGDriveLink(updatedSubscription.GDriveLink());
-                    subscriptionToUpdate.setCreationDate(updatedSubscription.creationDate());
-                    subscriptionToUpdate.setStartDate(updatedSubscription.startDate());
-                    subscriptionToUpdate.setPeriod(updatedSubscription.period());
-                    subscriptionToUpdate.setMonthlyRate(updatedSubscription.monthlyRate());
+                    if (updatedSubscription.getType() != null) {
+                        subscriptionToUpdate.setType(updatedSubscription.getType());
+                    }
+                    if (updatedSubscription.getGDriveLink() != null) {
+                        subscriptionToUpdate.setGDriveLink(updatedSubscription.getGDriveLink());
+                    }
+                    if (updatedSubscription.getCreationDate() != null) {
+                        subscriptionToUpdate.setCreationDate(updatedSubscription.getCreationDate());
+                    }
+                    if (updatedSubscription.getStartDate() != null) {
+                        subscriptionToUpdate.setStartDate(updatedSubscription.getStartDate());
+                    }
+                    if (updatedSubscription.getPeriod() != null) {
+                        subscriptionToUpdate.setPeriod(updatedSubscription.getPeriod());
+                    }
+                    if (updatedSubscription.getMonthlyRate() != null) {
+                        subscriptionToUpdate.setMonthlyRate(updatedSubscription.getMonthlyRate());
+                    }
                     return subscriptionRepository.save(subscriptionToUpdate);
                 })
                 .orElse(null);
+
     }
 }

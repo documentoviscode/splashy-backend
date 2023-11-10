@@ -1,15 +1,15 @@
 package org.documentoviscode.splashyapi.data.requests;
 
-
+import lombok.Data;
 import org.documentoviscode.splashyapi.config.DocFormat;
 
 import java.time.LocalDate;
 
-public record AdditionalPackageDTO(
-        DocFormat type,
-        String GDriveLink,
-        LocalDate creationDate,
-        String packageType,
-        double price
-) {
+@Data
+public class AdditionalPackageDTO {
+    private DocFormat type;
+    private String GDriveLink;
+    private LocalDate creationDate;
+    private String packageType;
+    private Double price;
 }
