@@ -2,15 +2,17 @@ package org.documentoviscode.splashyapi.domain;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.documentoviscode.splashyapi.config.DocFormat;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.util.List;
+
 
 
 /**
@@ -49,6 +51,7 @@ public class Document {
      * The creation date of the document.
      */
     @Column
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate creationDate;
 
     /**

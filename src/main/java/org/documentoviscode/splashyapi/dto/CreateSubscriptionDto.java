@@ -1,9 +1,14 @@
 package org.documentoviscode.splashyapi.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.documentoviscode.splashyapi.config.DocFormat;
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 import java.time.LocalDate;
 import java.util.function.Function;
 
@@ -19,8 +24,10 @@ public class CreateSubscriptionDto {
 
     private String GDriveLink;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate creationDate;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
     private int period;

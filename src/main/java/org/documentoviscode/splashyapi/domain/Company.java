@@ -68,5 +68,4 @@ public class Company {
     @OneToMany
     private List<Client> clients;
 
-    // Constructors, getters, setters, and other methods can be added here as needed.
 }
