@@ -1,25 +1,16 @@
 INSERT INTO Users (id, name, surname, email, role, avatar)
-VALUES  (1,'Cezary','Krawczyk','Cezary.Krawczyk@gmail.com',2,'tempAvatar1'),
-        (2,'Andrzej','Zakrzewska','Andrzej.Zakrzewska@gmail.com',2,'tempAvatar2'),
-        (3,'Dorota','Bak','Dorota.Bak@gmail.com',2,'tempAvatar3');
+VALUES  (1,'Cezary','Krawczyk','cezary.krawczyk@gmail.com',2,'admin.png');
 
-INSERT INTO Partners (id, name, surname, email, role, avatar,account_number,phone_number,pesel)
-VALUES  (4,'Ernest','Kolodziej','Ernest.Kolodziej@gmail.com',1,'tempAvatar4',123,'111 111 111','11111111111'),
-        (5,'Igor','Kazmierczak','Igor.Kazmierczak@gmail.com',1,'tempAvatar5',124,'222 222 222','22222222222'),
-        (6,'Maja','Sokolowska','Maja.Sokolowska@gmail.com',1,'tempAvatar6',125,'333 333 333','33333333333'),
-        (7,'Alicja','Chmielewska','Alicja.Chmielewska@gmail.com',1,'tempAvatar7',126,'444 444 444','44444444444');
+INSERT INTO Partners (id, name, surname, nickname, email, role, avatar,account_number,phone_number,pesel)
+VALUES  (2,'Alicja','Wróblewska', 'queenAlicja', 'alicja.wroblewska@wp.pl',1,'partner1.png',84501634,'510 642 755','98050293235'),
+        (3,'Igor','Kazmierczak', 'igorek845', 'Igor.Kazmierczak@gmail.com',1,'partner2.png',54791546,'784 826 166','86072435742'),
+        (4,'Maja','Sokołowska', 'majaTV', 'Maja.Sokolowska@gmail.com',1,'partner3.png',654489271,'621 496 178','99071095279');
 
 INSERT INTO Credit_cards (id, number, cvc, expiration_Date)
-VALUES  (1,'123123','123','2023-12-31'),
-        (2,'334343','321','2024-01-01'),
-        (3,'454545','111','2024-02-02'),
-        (4,'888888','098','2024-03-03');
+VALUES  (1,'5504737089315318','583','2027-09-01');
 
 INSERT INTO Clients (id, name, surname, email, role, avatar,credit_card_id)
-VALUES  (8,'Ernest','Kolodziej','Ernest.Kolodziej@gmail.com',0,'tempAvatar8',1),
-        (9,'Igor','Kazmierczak','Igor.Kazmierczak@gmail.com',0,'tempAvatar9',2),
-        (10,'Maja','Sokolowska','Maja.Sokolowska@gmail.com',0,'tempAvatar10',3),
-        (11,'Alicja','Chmielewska','Alicja.Chmielewska@gmail.com',0,'tempAvatar11',4);
+VALUES  (5,'Ernest','Kołodziej','ernest.kolodziej@gmail.com',0,'client.png',1);
 
 /*INSERT INTO Documents (id, type, GDrive_Link, creation_date)
 VALUES  (1,0,'<GLinkDrive1>','2023-10-29'),
