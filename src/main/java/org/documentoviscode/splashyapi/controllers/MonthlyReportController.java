@@ -4,6 +4,8 @@ package org.documentoviscode.splashyapi.controllers;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
 import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreateMonthlyReportDto;
+import org.documentoviscode.splashyapi.dto.CreateSubscriptionDto;
 import org.documentoviscode.splashyapi.services.MonthlyReportService;
 import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,17 +61,21 @@ public class MonthlyReportController {
     /**
      * Create a new MonthlyReport for a specified user.
      *
-     * @param newMonthlyReport The monthly record to be created.
+     * @param monthlyReportDto The monthly report DTO record to create monthly report entity.
      * @param userId          The ID of the user for whom the monthly record is created.
      * @return ResponseEntity containing the created monthly record and HTTP status.
      */
     @PostMapping
-    public ResponseEntity<MonthlyReport> createMonthlyReport(@RequestBody MonthlyReport newMonthlyReport, @RequestParam Long userId )
+    public ResponseEntity<MonthlyReport> createMonthlyReport(@RequestBody CreateMonthlyReportDto monthlyReportDto, @RequestParam Long userId )
     {
         Optional<User> userOptional = userService.findUserById(userId);
 
         if(userOptional.isPresent())
         {
+            MonthlyReport newMonthlyReport = CreateMonthlyReportDto
+                    .dtoToEntityMapper()
+                    .apply(monthlyReportDto);
+
             newMonthlyReport.setUser(userOptional.get());
             MonthlyReport createdMonthlyReport = monthlyReportService.create(newMonthlyReport);
             if(createdMonthlyReport!=null)

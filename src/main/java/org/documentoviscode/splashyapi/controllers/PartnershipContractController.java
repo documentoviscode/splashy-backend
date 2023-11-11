@@ -4,6 +4,8 @@ package org.documentoviscode.splashyapi.controllers;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreatePartnershipContractDto;
+import org.documentoviscode.splashyapi.dto.CreateSubscriptionDto;
 import org.documentoviscode.splashyapi.services.PartnershipContractService;
 import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,17 +61,21 @@ public class PartnershipContractController {
     /**
      * Create a new PartnershipContract for a specified user.
      *
-     * @param newPartnershipContract The partnership contract to be created.
+     * @param partnershipContractDto The partnership contract DTO to create partnership contract entity.
      * @param userId          The ID of the user for whom the partnership contract is created.
      * @return ResponseEntity containing the created partnership contract and HTTP status.
      */
     @PostMapping
-    public ResponseEntity<PartnershipContract> createPartnershipContract(@RequestBody PartnershipContract newPartnershipContract, @RequestParam Long userId )
+    public ResponseEntity<PartnershipContract> createPartnershipContract(@RequestBody CreatePartnershipContractDto partnershipContractDto, @RequestParam Long userId )
     {
         Optional<User> userOptional = userService.findUserById(userId);
 
         if(userOptional.isPresent())
         {
+            PartnershipContract newPartnershipContract = CreatePartnershipContractDto
+                    .dtoToEntityMapper()
+                    .apply(partnershipContractDto);
+
             newPartnershipContract.setUser(userOptional.get());
             PartnershipContract createdPartnershipContract = partnershipContractService.create(newPartnershipContract);
 

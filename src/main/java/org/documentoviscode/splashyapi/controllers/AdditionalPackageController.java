@@ -5,6 +5,7 @@ package org.documentoviscode.splashyapi.controllers;
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
 import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreateAdditionalPackageDto;
 import org.documentoviscode.splashyapi.services.AdditionalPackageService;
 import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,19 +61,24 @@ public class AdditionalPackageController {
     /**
      * Create a new AdditionalPackage for a specified user.
      *
-     * @param newAdditionalPackage The additional package to be created.
+     * @param additionalPackageDto The additional package DTO to create additional package entity.
      * @param userId          The ID of the user for whom the additional package is created.
      * @return ResponseEntity containing the created additional package and HTTP status.
      */
     @PostMapping
-    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody AdditionalPackage newAdditionalPackage, @RequestParam Long userId )
+    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody CreateAdditionalPackageDto additionalPackageDto, @RequestParam Long userId )
     {
         Optional<User> userOptional = userService.findUserById(userId);
 
         if(userOptional.isPresent())
         {
+            AdditionalPackage newAdditionalPackage = CreateAdditionalPackageDto
+                    .dtoToEntityMapper()
+                            .apply(additionalPackageDto);
+
             newAdditionalPackage.setUser(userOptional.get());
             AdditionalPackage createdAdditionalPackage = additionalPackageService.create(newAdditionalPackage);
+
             if(createdAdditionalPackage!=null)
             {
                 return new ResponseEntity<>(createdAdditionalPackage, HttpStatus.CREATED);

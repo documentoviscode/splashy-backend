@@ -3,12 +3,14 @@ package org.documentoviscode.splashyapi.controllers;
 
 import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreateSubscriptionDto;
 import org.documentoviscode.splashyapi.services.SubscriptionService;
 import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,18 +60,23 @@ public class SubscriptionController {
     /**
      * Create a new subscription for a specified user.
      *
-     * @param newSubscription The subscription to be created.
+     * @param subscriptionDto The subscription DTO to create Subscription Entity.
      * @param userId          The ID of the user for whom the subscription is created.
      * @return ResponseEntity containing the created subscription and HTTP status.
      */
     @PostMapping
-    public ResponseEntity<Subscription> createSubscription(@RequestBody Subscription newSubscription, @RequestParam Long userId)
+    public ResponseEntity<Subscription> createSubscription(@RequestBody CreateSubscriptionDto subscriptionDto, @RequestParam Long userId)
     {
         Optional<User> userOptional = userService.findUserById(userId);
 
         if(userOptional.isPresent())
         {
+            Subscription newSubscription = CreateSubscriptionDto
+                    .dtoToEntityMapper()
+                    .apply(subscriptionDto);
+
             newSubscription.setUser(userOptional.get());
+
             Subscription createdSubscription = subscriptionService.create(newSubscription);
 
             if(createdSubscription!=null)
@@ -80,9 +87,9 @@ public class SubscriptionController {
             {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
-
         }
-        else{
+        else
+        {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
