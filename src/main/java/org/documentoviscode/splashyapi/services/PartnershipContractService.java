@@ -1,5 +1,6 @@
 package org.documentoviscode.splashyapi.services;
 
+import org.documentoviscode.splashyapi.data.requests.PartnershipContractDTO;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.repositories.PartnershipContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,5 +44,42 @@ public class PartnershipContractService {
      */
     public List<PartnershipContract> findAll() {
         return partnershipContractRepository.findAll();
+    }
+
+    /**
+     * Update an existing partnership contract.
+     *
+     * @param id                   The ID of the partnership contract to be updated.
+     * @param updatedContract The updated partnership contract data.
+     * @return The updated partnership contract or null if the contract with the specified ID is not found.
+     */
+    public PartnershipContract updatePartnershipContract(Long id, PartnershipContractDTO updatedContract) {
+        return findPartnershipContractById(id)
+                .map(contractToUpdate -> {
+                    if (updatedContract.getType() != null) {
+                        contractToUpdate.setType(updatedContract.getType());
+                    }
+                    if (updatedContract.getGDriveLink() != null) {
+                        contractToUpdate.setGDriveLink(updatedContract.getGDriveLink());
+                    }
+                    if (updatedContract.getCreationDate() != null) {
+                        contractToUpdate.setCreationDate(updatedContract.getCreationDate());
+                    }
+                    if (updatedContract.getStartDate() != null) {
+                        contractToUpdate.setStartDate(updatedContract.getStartDate());
+                    }
+                    if (updatedContract.getEndDate() != null) {
+                        contractToUpdate.setEndDate(updatedContract.getEndDate());
+                    }
+                    if (updatedContract.getRate() != null) {
+                        contractToUpdate.setRate(updatedContract.getRate());
+                    }
+                    if (updatedContract.getDonationPercentage() != null) {
+                        contractToUpdate.setDonationPercentage(updatedContract.getDonationPercentage());
+                    }
+                    return partnershipContractRepository.save(contractToUpdate);
+                })
+                .orElse(null);
+
     }
 }
