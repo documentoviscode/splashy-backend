@@ -35,4 +35,10 @@ public class Partner extends User {
      */
     @Column
     private String PESEL;
+
+    /**
+     * Partner nickname that they are known by on the platform
+     */
+    @Column
+    private String nickname;
 }
