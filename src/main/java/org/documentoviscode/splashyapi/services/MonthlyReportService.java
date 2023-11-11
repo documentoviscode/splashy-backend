@@ -2,9 +2,11 @@ package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.data.requests.MonthlyReportDTO;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
+import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.MonthlyReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +45,19 @@ public class MonthlyReportService {
      */
     public List<MonthlyReport> findAll() {
         return monthlyReportRepository.findAll();
+    }
+
+    /**
+     * Create a new monthly report by saving it to the repository.
+     *
+     * @param monthlyReport The monthly report to be created.
+     * @return The created monthly report.
+     */
+    @Transactional
+    public MonthlyReport create(MonthlyReport monthlyReport) {
+
+        return monthlyReportRepository.save(monthlyReport);
+
     }
 
     /**

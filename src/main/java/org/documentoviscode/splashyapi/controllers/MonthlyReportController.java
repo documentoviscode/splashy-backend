@@ -3,17 +3,16 @@ package org.documentoviscode.splashyapi.controllers;
 
 import org.documentoviscode.splashyapi.data.requests.MonthlyReportDTO;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
+import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreateMonthlyReportDto;
+import org.documentoviscode.splashyapi.dto.CreateSubscriptionDto;
 import org.documentoviscode.splashyapi.services.MonthlyReportService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +24,7 @@ import java.util.Optional;
 @RequestMapping("/monthlyReports")
 public class MonthlyReportController {
     private final MonthlyReportService monthlyReportService;
+    private final UserService userService;
 
     /**
      * Constructor for the MonthlyReportController class.
@@ -32,8 +32,9 @@ public class MonthlyReportController {
      * @param monthlyReportService The service for managing monthly report-related operations.
      */
     @Autowired
-    public MonthlyReportController(MonthlyReportService monthlyReportService) {
+    public MonthlyReportController(MonthlyReportService monthlyReportService, UserService userService) {
         this.monthlyReportService = monthlyReportService;
+        this.userService = userService;
     }
 
     /**
@@ -56,6 +57,40 @@ public class MonthlyReportController {
     public ResponseEntity<MonthlyReport> getMonthlyReport(@PathVariable("id") long id) {
         Optional<MonthlyReport> monthlyReport = monthlyReportService.findMonthlyReportById(id);
         return monthlyReport.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Create a new MonthlyReport for a specified user.
+     *
+     * @param monthlyReportDto The monthly report DTO record to create monthly report entity.
+     * @param userId          The ID of the user for whom the monthly record is created.
+     * @return ResponseEntity containing the created monthly record and HTTP status.
+     */
+    @PostMapping
+    public ResponseEntity<MonthlyReport> createMonthlyReport(@RequestBody CreateMonthlyReportDto monthlyReportDto, @RequestParam Long userId )
+    {
+        Optional<User> userOptional = userService.findUserById(userId);
+
+        if(userOptional.isPresent())
+        {
+            MonthlyReport newMonthlyReport = CreateMonthlyReportDto
+                    .dtoToEntityMapper()
+                    .apply(monthlyReportDto);
+
+            newMonthlyReport.setUser(userOptional.get());
+            MonthlyReport createdMonthlyReport = monthlyReportService.create(newMonthlyReport);
+            if(createdMonthlyReport!=null)
+            {
+                return new ResponseEntity<>(createdMonthlyReport, HttpStatus.CREATED);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     /**

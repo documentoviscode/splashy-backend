@@ -2,9 +2,11 @@ package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.data.requests.PartnershipContractDTO;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
+import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.PartnershipContractRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +46,18 @@ public class PartnershipContractService {
      */
     public List<PartnershipContract> findAll() {
         return partnershipContractRepository.findAll();
+    }
+
+    /**
+     * Create a new partnership contract by saving it to the repository.
+     *
+     * @param partnershipContract The partnership contract to be created.
+     * @return The created partnership contract.
+     */
+    @Transactional
+    public PartnershipContract create(PartnershipContract partnershipContract) {
+
+        return partnershipContractRepository.save(partnershipContract);
     }
 
     /**

@@ -3,16 +3,16 @@ package org.documentoviscode.splashyapi.controllers;
 
 import org.documentoviscode.splashyapi.data.requests.PartnershipContractDTO;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
+import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreatePartnershipContractDto;
+import org.documentoviscode.splashyapi.dto.CreateSubscriptionDto;
 import org.documentoviscode.splashyapi.services.PartnershipContractService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +24,7 @@ import java.util.Optional;
 @RequestMapping("/partnershipContracts")
 public class PartnershipContractController {
     private final PartnershipContractService partnershipContractService;
+    private final UserService userService;
 
     /**
      * Constructor for the PartnershipContractController class.
@@ -31,8 +32,9 @@ public class PartnershipContractController {
      * @param partnershipContractService The service for managing partnership contract-related operations.
      */
     @Autowired
-    public PartnershipContractController(PartnershipContractService partnershipContractService) {
+    public PartnershipContractController(PartnershipContractService partnershipContractService, UserService userService) {
         this.partnershipContractService = partnershipContractService;
+        this.userService = userService;
     }
 
     /**
@@ -55,6 +57,41 @@ public class PartnershipContractController {
     public ResponseEntity<PartnershipContract> getPartnershipContract(@PathVariable("id") long id) {
         Optional<PartnershipContract> partnershipContract = partnershipContractService.findPartnershipContractById(id);
         return partnershipContract.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Create a new PartnershipContract for a specified user.
+     *
+     * @param partnershipContractDto The partnership contract DTO to create partnership contract entity.
+     * @param userId          The ID of the user for whom the partnership contract is created.
+     * @return ResponseEntity containing the created partnership contract and HTTP status.
+     */
+    @PostMapping
+    public ResponseEntity<PartnershipContract> createPartnershipContract(@RequestBody CreatePartnershipContractDto partnershipContractDto, @RequestParam Long userId )
+    {
+        Optional<User> userOptional = userService.findUserById(userId);
+
+        if(userOptional.isPresent())
+        {
+            PartnershipContract newPartnershipContract = CreatePartnershipContractDto
+                    .dtoToEntityMapper()
+                    .apply(partnershipContractDto);
+
+            newPartnershipContract.setUser(userOptional.get());
+            PartnershipContract createdPartnershipContract = partnershipContractService.create(newPartnershipContract);
+
+            if(createdPartnershipContract!=null)
+            {
+                return new ResponseEntity<>(createdPartnershipContract, HttpStatus.CREATED);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     /**

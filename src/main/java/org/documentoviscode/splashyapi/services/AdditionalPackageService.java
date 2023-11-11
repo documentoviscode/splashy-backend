@@ -2,9 +2,11 @@ package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.data.requests.AdditionalPackageDTO;
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
+import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.AdditionalPackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +45,18 @@ public class AdditionalPackageService {
      */
     public List<AdditionalPackage> findAll() {
         return additionalPackageRepository.findAll();
+    }
+
+    /**
+     * Create a new additional package by saving it to the repository.
+     *
+     * @param additionalPackage The additional package to be created.
+     * @return The created additional package.
+     */
+    @Transactional
+    public AdditionalPackage create(AdditionalPackage additionalPackage)
+    {
+        return additionalPackageRepository.save(additionalPackage);
     }
 
     /**

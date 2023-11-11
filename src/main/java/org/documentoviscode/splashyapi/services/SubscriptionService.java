@@ -5,6 +5,7 @@ import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.SubscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,18 @@ public class SubscriptionService {
      */
     public List<Subscription> findAll() {
         return subscriptionRepository.findAll();
+    }
+
+    /**
+     * Create a new subscription by saving it to the repository.
+     *
+     * @param subscription The subscription to be created.
+     * @return The created subscription.
+     */
+    @Transactional
+    public Subscription create(Subscription subscription)
+    {
+        return subscriptionRepository.save(subscription);
     }
 
     /**
