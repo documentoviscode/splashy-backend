@@ -43,4 +43,16 @@ public class PartnershipContract extends Document {
      */
     @Column
     private double donationPercentage;
+
+    /**
+     * Is contract extension in progress
+     */
+    @Column
+    private Boolean contractExtensionInProgress;
+
+    /**
+     * Is contract offer visible to partner
+     */
+    @Column
+    private Boolean contractExtensionOfferVisible;
 }
