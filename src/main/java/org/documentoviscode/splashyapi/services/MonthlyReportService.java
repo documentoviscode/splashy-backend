@@ -54,7 +54,7 @@ public class MonthlyReportService {
             }
         }
         );
-        return monthlyReportRepository.findById(id);
+        return monthlyReport;
     }
 
     /**
