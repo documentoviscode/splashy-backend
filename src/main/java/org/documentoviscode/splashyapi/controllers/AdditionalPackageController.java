@@ -77,7 +77,7 @@ public class AdditionalPackageController {
             {
                 Double price = Math.ceil((createdAdditionalPackage.getPrice() * 123d)) / 100.0;
                 String stringPrice = String.format("%.2f", price);
-                emailService.sendShortenedFacture("michalziemiec@wp.pl", userOptional.get().getName(), createdAdditionalPackage.getPackageType(), stringPrice);
+                emailService.sendShortenedFacture("documentovisco@gmail.com", userOptional.get().getName(), createdAdditionalPackage.getPackageType(), stringPrice);
                 return new ResponseEntity<>(createdAdditionalPackage, HttpStatus.CREATED);
             }
             else
