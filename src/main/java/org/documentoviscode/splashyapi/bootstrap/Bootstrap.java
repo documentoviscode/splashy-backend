@@ -10,7 +10,6 @@ public class Bootstrap implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println("Running bootstrap...");
 
-        // INSERT YOUR OBJECTS HERE
 
         System.out.println("Bootstrap has finished");
     }
