@@ -91,6 +91,12 @@ public class PartnershipContractService {
                     if (updatedContract.getDonationPercentage() != null) {
                         contractToUpdate.setDonationPercentage(updatedContract.getDonationPercentage());
                     }
+                    if (updatedContract.getContractExtensionInProgress() != null) {
+                        contractToUpdate.setContractExtensionInProgress(updatedContract.getContractExtensionInProgress());
+                    }
+                    if (updatedContract.getContractExtensionOfferVisible() != null) {
+                        contractToUpdate.setContractExtensionOfferVisible(updatedContract.getContractExtensionOfferVisible());
+                    }
                     return partnershipContractRepository.save(contractToUpdate);
                 })
                 .orElse(null);

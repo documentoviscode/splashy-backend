@@ -4,20 +4,15 @@ import io.camunda.tasklist.CamundaTaskListClient;
 import io.camunda.tasklist.auth.SaasAuthentication;
 import io.camunda.tasklist.dto.TaskList;
 import io.camunda.tasklist.dto.TaskSearch;
-import io.camunda.tasklist.dto.TaskState;
 import io.camunda.tasklist.exception.TaskListException;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProvider;
 import io.camunda.zeebe.client.impl.oauth.OAuthCredentialsProviderBuilder;
+import org.documentoviscode.splashyapi.data.requests.PartnershipContractDTO;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Map;
 
 @Service
@@ -38,7 +33,10 @@ public class DocumentCirculationService {
 
     private ProcessInstanceEvent processInstanceEvent;
 
-    public DocumentCirculationService() {
+    private final PartnershipContractService partnershipContractService;
+
+    public DocumentCirculationService(PartnershipContractService partnershipContractService) {
+        this.partnershipContractService = partnershipContractService;
         OAuthCredentialsProvider credentialsProvider =
                 new OAuthCredentialsProviderBuilder()
                         .authorizationServerUrl(oAuthAPI)
@@ -69,13 +67,18 @@ public class DocumentCirculationService {
         }
     }
 
-    public void createProcessInstance() {
+    public void createProcessInstance(Long idPartner, Long idContract) {
         processInstanceEvent = client
                 .newCreateInstanceCommand()
                 .bpmnProcessId(deploymentEvent.getProcesses().get(0).getBpmnProcessId())
                 .latestVersion()
+                .variables(Map.of("idPartner", idPartner.toString(), "idContract", idContract.toString()))
                 .send()
                 .join();
+
+        PartnershipContractDTO dto = new PartnershipContractDTO();
+        dto.setContractExtensionInProgress(true);
+        partnershipContractService.updatePartnershipContract(idContract, dto);
     }
 
     public void completeAdminReviewTask(Boolean approval) throws TaskListException {

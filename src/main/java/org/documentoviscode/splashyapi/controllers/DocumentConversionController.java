@@ -5,15 +5,17 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
 import org.documentoviscode.splashyapi.data.CustomMultipartFile;
+import org.documentoviscode.splashyapi.data.requests.MonthlyReportDTO;
+import org.documentoviscode.splashyapi.domain.MonthlyReport;
+import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.services.MonthlyReportService;
+import org.documentoviscode.splashyapi.services.PartnershipContractService;
 import org.documentoviscode.splashyapi.utility.fileconversion.DataJSON;
 import org.json.simple.JSONObject;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,16 +25,58 @@ import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 
 @RequiredArgsConstructor
 @RestController
 public class DocumentConversionController{
-    private final ApplicationContext applicationContext;
     private final MonthlyReportService monthlyReportService;
     private final GoogleDriveController googleDriveController;
+    private final PartnershipContractService partnershipContractService;
+
+    private String generateMonthlyReport(Long reportId) throws Exception {
+        MonthlyReport report = monthlyReportService.findMonthlyReportById(reportId).get();
+        String template = "src/main/resources/monthlyReport_" + reportId + ".json";
+        JSONObject json = new JSONObject();
+        PartnershipContract contract = new PartnershipContract();
+        for (org.documentoviscode.splashyapi.domain.Document d: report.getUser().getDocuments()) {
+            Optional<PartnershipContract> c = partnershipContractService.findPartnershipContractById(d.getId());
+            if (c.isPresent() && c.get().getEndDate().equals(report.getEndDate())) {
+                contract = c.get();
+                break;
+            }
+        }
+
+        json.put("id", report.getId());
+        json.put("type", "JSON");
+        json.put("creationDate", report.getCreationDate().toString());
+        json.put("partnerName", report.getUser().getName());
+        json.put("partnerSurname", report.getUser().getSurname());
+        json.put("partnerEmail", report.getUser().getEmail());
+        json.put("startDate", report.getStartDate().toString());
+        json.put("endDate", report.getEndDate().toString());
+        json.put("viewers", report.getViewers());
+        json.put("hoursWatched", report.getHoursWatched());
+        json.put("donations", report.getDonations());
+        json.put("rate", contract.getRate());
+        json.put("donationPercentage", contract.getDonationPercentage());
+        DataJSON data = new DataJSON();
+        data.setKeys(json);
+
+        org.documentoviscode.splashyapi.utility.fileconversion.Document docJSON =
+                new org.documentoviscode.splashyapi.utility.fileconversion.Document(data);
+        docJSON.saveTo(template);
+
+        String fileId = googleDriveController.createFile(new CustomMultipartFile(Path.of(template)));
+        report.setGDriveLink(fileId);
+        MonthlyReportDTO updated = new MonthlyReportDTO();
+        updated.setGDriveLink(fileId);
+        monthlyReportService.updateMonthlyReport(reportId, updated);
+        new File(template).delete();
+        return fileId;
+    }
 
     @GetMapping(value = { "/monthlyReportPartner/{reportId}" })
     public ResponseEntity<byte[]> generatePartnerMonthlyReport(@PathVariable(name = "reportId") Long reportId) throws Exception {
@@ -40,7 +84,7 @@ public class DocumentConversionController{
         String downloadedFileName = "downloaded.json";
 
         String fileId = monthlyReportService.findMonthlyReportById(reportId).get().getGDriveLink();
-        googleDriveController.listFiles().getFiles();
+        if (fileId == null) fileId = generateMonthlyReport(reportId);
 
         File downloaded = new File(reportPath + downloadedFileName);
         try (FileOutputStream outputStream = new FileOutputStream(downloaded)) {
@@ -53,8 +97,7 @@ public class DocumentConversionController{
         JSONObject data = ((DataJSON)jsonDoc.getData()).getKeys();
         downloaded.delete();
 
-        JSONObject partner = new JSONObject(((List<Map>) data.get("users")).get(0));
-        String reportFileName = "monthlyReport_" + partner.get("id") + "_" + data.get("creationDate") + ".pdf";
+        String reportFileName = "monthlyReport_" + data.get("creationDate") + ".pdf";
 
         com.itextpdf.text.Document document = new com.itextpdf.text.Document();
         FileOutputStream outputStream = new FileOutputStream(reportPath + reportFileName);
@@ -76,13 +119,15 @@ public class DocumentConversionController{
 
         document.add(new Paragraph("Dane partnera:", fontHeader2));
         fontNormal.isUnderlined();
-        document.add(new Paragraph("Imie: " + partner.get("name"), fontNormal));
-        document.add(new Paragraph("Nazwisko: " + partner.get("surname"), fontNormal));
-        document.add(new Paragraph("E-mail: " + partner.get("email"), fontNormal));
+        document.add(new Paragraph("Imie: " + data.get("partnerName"), fontNormal));
+        document.add(new Paragraph("Nazwisko: " + data.get("partnerSurname"), fontNormal));
+        document.add(new Paragraph("E-mail: " + data.get("partnerEmail"), fontNormal));
         Paragraph p = new Paragraph("\n\nRozliczenie:\n\n", fontNormal);
         p.setAlignment(Element.ALIGN_CENTER);
         document.add(p);
 
+        double donation_tax = (double) data.get("donationPercentage");
+        double rate = (double) data.get("rate");
         PdfPTable table = new PdfPTable(new float[]{0.7f, 0.3f});
         table.setPaddingTop(1);
         table.addCell(new Phrase("Liczba ogladajacych", fontTable));
@@ -90,16 +135,14 @@ public class DocumentConversionController{
         table.addCell(new Phrase("Suma obejrzanych godzin", fontTable));
         table.addCell(new Phrase(data.get("hoursWatched").toString(), fontTable));
         table.addCell(new Phrase("Stawka za godzine ogladalnosci", fontTable));
-        table.addCell(new Phrase("0,03 PLN", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", rate) + " PLN", fontTable));
         table.addCell(new Phrase("Suma z dotacji", fontTable));
-        table.addCell(new Phrase(data.get("donations") + " PLN", fontTable));
-        float donation_tax = 0.3f;
-        table.addCell(new Phrase("Procent z dotacji dla pracodawcy (" + (int)(donation_tax * 100) + "%)", fontTable));
-        table.addCell(new Phrase(String.format("%.2f", ((Long)data.get("donations")).floatValue() * donation_tax) + " PLN", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", (double)data.get("donations")) + " PLN", fontTable));
+        table.addCell(new Phrase("Procent z dotacji dla pracodawcy (" + (int)(donation_tax) + "%)", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", ((double )data.get("donations")) * donation_tax / 100) + " PLN", fontTable));
         table.addCell(new Phrase("Calkowite wynagrodzenie", fontTable));
-        float reward = ((Long)data.get("donations")).floatValue() * (1.0f - donation_tax)
-                + ((Long)data.get("hoursWatched")).floatValue() * 0.03f;
-//                + ((Long)data.get("hoursWatched")).floatValue() * ((Long)data.get("hourRate")).floatValue();
+        double reward = ((double)data.get("donations")) * (1.0 - donation_tax / 100.0)
+                + ((double)data.get("hoursWatched")) * rate;
         table.addCell(new Phrase( String.format("%.2f", reward) + " PLN", fontTable));
         document.add(table);
         document.add(new Paragraph("\n\n\n\n\n\n\n"));

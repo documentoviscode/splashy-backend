@@ -18,9 +18,12 @@ public class DocumentCirculationController {
 
     private final DocumentCirculationService documentCirculationService;
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createInstance() {
-        documentCirculationService.createProcessInstance();
+    @PostMapping("/create/{idPartner}/{idContract}")
+    public ResponseEntity<String> createInstance(
+            @PathVariable("idPartner") Long idPartner,
+            @PathVariable("idContract") Long idContract
+    ) {
+        documentCirculationService.createProcessInstance(idPartner, idContract);
         return ResponseEntity.ok("200 okiej");
     }
 
