@@ -8,6 +8,7 @@ import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.repositories.MonthlyReportRepository;
+import org.documentoviscode.splashyapi.utility.RevenueCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing monthly report-related operations.
@@ -41,19 +43,7 @@ public class MonthlyReportService {
      */
     public Optional<MonthlyReport> findMonthlyReportById(Long id) {
         Optional<MonthlyReport> monthlyReport = monthlyReportRepository.findById(id);
-        monthlyReport.ifPresent(mr -> {
-            Partner partner = (Partner) mr.getUser();
-            if (partner != null) {
-                Optional<PartnershipContract> partnershipContract = partner.getDocuments().stream()
-                        .filter(d -> d instanceof PartnershipContract)
-                        .map(d -> (PartnershipContract) d)
-                        .filter(pc -> (pc.getEndDate()).isAfter(LocalDate.now()))
-                        .findAny();
-
-                partnershipContract.ifPresent(contract -> mr.setRevenue(mr.getDonations() * contract.getRate()));
-            }
-        }
-        );
+        monthlyReport.ifPresent(mr -> mr.setRevenue(RevenueCalculator.calculateRevenue(mr)));
         return monthlyReport;
     }
 
@@ -63,7 +53,9 @@ public class MonthlyReportService {
      * @return List of all monthly report entities.
      */
     public List<MonthlyReport> findAll() {
-        return monthlyReportRepository.findAll();
+        return monthlyReportRepository.findAll().stream()
+                .peek(monthlyReport -> monthlyReport.setRevenue(RevenueCalculator.calculateRevenue(monthlyReport)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -116,7 +108,7 @@ public class MonthlyReportService {
                     return monthlyReportRepository.save(monthlyReportToUpdate);
                 })
                 .orElse(null);
-
     }
+
 
 }
