@@ -20,8 +20,8 @@ VALUES  (1,0,'<GLinkDrive1>','2023-10-29'),
 INSERT INTO Partnership_Contracts(id, type, GDrive_Link, creation_date,start_date,end_date,rate,donation_percentage, user_id)
 VALUES  (4, 0,'<GLinkDrive4>','2023-08-01','2023-08-01','2023-09-30',1.0,69, 2), --Alicja first contract
         (5, 0,'<GLinkDrive5>','2023-10-01','2023-10-01','2023-11-30',1.2,80, 2), --Alicja second contract
-        (6, 0,'<GLinkDrive6>','2023-10-01','2023-10-01','2023-11-30',0.9,10, 3), --Igor first contract
-        (7, 0,'<GLinkDrive7>','2023-10-01','2023-10-01','2023-11-30',1.1,99, 4); --Maja first contract
+        (6, 0,'<GLinkDrive6>','2023-09-01','2023-09-01','2023-11-30',0.9,10, 3), --Igor first contract
+        (7, 0,'<GLinkDrive7>','2023-09-01','2023-09-01','2023-11-30',1.1,99, 4); --Maja first contract
 
 /*
 INSERT INTO Additional_Packages(id, type, GDrive_Link, creation_date,package_type,price, user_id)
@@ -38,7 +38,7 @@ VALUES  (13,2,'<GLinkDrive13>','2023-08-01','2023-08-01','2023-08-31',1111,45454
         (14,3,'<GLinkDrive14>','2023-09-01','2023-09-01','2023-09-30',2342,985945,2342, 2), --Alicja September monthly report
         (15,3,'<GLinkDrive15>','2023-10-01','2023-10-01','2023-10-31',10003,123333.3,3455, 2), --Alicja October monthly report
         (16,3,'<GLinkDrive16>','2023-11-01','2023-11-01','2023-11-30',20332,256032,4500, 2), --Alicja November monthly report
-        (17,3,'<GLinkDrive17>','2023-10-01','2023-10-01','2023-10-31',20332,502532,9504, 3), --Igor October monthly report
-        (18,3,'<GLinkDrive18>','2023-11-01','2023-11-01','2023-11-30',35322,1232522.3,1002, 3), --Igor November monthly report
-        (19,3,'<GLinkDrive19>','2023-10-01','2023-10-01','2023-10-31',532,64321.3,321, 4), --Maja October monthly report
-        (20,3,'<GLinkDrive20>','2023-11-01','2023-11-01','2023-11-30',513,35123,235, 4); --Maja November monthly report
+        (17,3,'<GLinkDrive17>','2023-09-01','2023-09-01','2023-09-31',20332,502532,9504, 3), --Igor September monthly report
+        (18,3,'<GLinkDrive18>','2023-10-01','2023-10-01','2023-10-30',35322,1232522.3,1002, 3), --Igor October monthly report
+        (19,3,'<GLinkDrive19>','2023-09-01','2023-09-01','2023-09-31',532,64321.3,321, 4), --Maja September monthly report
+        (20,3,'<GLinkDrive20>','2023-10-01','2023-10-01','2023-10-30',513,35123,235, 4); --Maja October monthly report
