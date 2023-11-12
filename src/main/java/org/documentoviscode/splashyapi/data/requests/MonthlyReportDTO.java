@@ -16,4 +16,5 @@ public class MonthlyReportDTO {
     private Integer viewers;
     private Double hoursWatched;
     private Double donations;
+    private Double revenue;
 }

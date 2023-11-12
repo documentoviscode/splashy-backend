@@ -1,13 +1,18 @@
 package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.data.requests.MonthlyReportDTO;
+import org.documentoviscode.splashyapi.domain.Document;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
+import org.documentoviscode.splashyapi.domain.Partner;
+import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.repositories.MonthlyReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +40,20 @@ public class MonthlyReportService {
      * @return Optional containing the monthly report or an empty optional if the report is not found.
      */
     public Optional<MonthlyReport> findMonthlyReportById(Long id) {
+        Optional<MonthlyReport> monthlyReport = monthlyReportRepository.findById(id);
+        monthlyReport.ifPresent(mr -> {
+            Partner partner = (Partner) mr.getUser();
+            if (partner != null) {
+                Optional<PartnershipContract> partnershipContract = partner.getDocuments().stream()
+                        .filter(d -> d instanceof PartnershipContract)
+                        .map(d -> (PartnershipContract) d)
+                        .filter(pc -> (pc.getEndDate()).isAfter(LocalDate.now()))
+                        .findAny();
+
+                partnershipContract.ifPresent(contract -> mr.setRevenue(mr.getHoursWatched() * contract.getRate()));
+            }
+        }
+        );
         return monthlyReportRepository.findById(id);
     }
 
@@ -93,6 +112,9 @@ public class MonthlyReportService {
                     }
                     if (updatedMonthlyReport.getDonations() != null) {
                         monthlyReportToUpdate.setDonations(updatedMonthlyReport.getDonations());
+                    }
+                    if (updatedMonthlyReport.getRevenue() != null) {
+                        monthlyReportToUpdate.setDonations(updatedMonthlyReport.getRevenue());
                     }
                     return monthlyReportRepository.save(monthlyReportToUpdate);
                 })
