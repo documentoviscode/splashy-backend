@@ -1,6 +1,8 @@
 package org.documentoviscode.splashyapi.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
@@ -52,7 +54,8 @@ public class Document {
     /**
      * The list of users associated with the document.
      */
-    @ManyToMany
-    private List<User> users;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JsonBackReference
+    private User user;
 
 }

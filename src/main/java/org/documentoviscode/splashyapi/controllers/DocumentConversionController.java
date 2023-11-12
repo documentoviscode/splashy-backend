@@ -3,6 +3,7 @@ package org.documentoviscode.splashyapi.controllers;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import lombok.RequiredArgsConstructor;
 import org.documentoviscode.splashyapi.data.CustomMultipartFile;
 import org.documentoviscode.splashyapi.utility.fileconversion.DataJSON;
 import org.json.simple.JSONObject;
@@ -20,17 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 
-@Component
+@RequiredArgsConstructor
 @RestController
 public class DocumentConversionController{
     private final ApplicationContext applicationContext;
 
-    public DocumentConversionController(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
-    @GetMapping(value = { "/monthlyReportPartner/{fileId}" })
-    public String generatePartnerMonthlyReport(@PathVariable(name = "fileId") String fileId) throws Exception {
+    @GetMapping(value = { "/monthlyReportPartner/{reportId}" })
+    public String generatePartnerMonthlyReport(@PathVariable(name = "reportId") String reportId) throws Exception {
         String reportPath = "src/main/resources/";
         String downloadedFileName = "downloaded.json";
 
@@ -38,7 +35,7 @@ public class DocumentConversionController{
 
         File downloaded = new File(reportPath + downloadedFileName);
         try (FileOutputStream outputStream = new FileOutputStream(downloaded)) {
-            outputStream.write(controller.downloadFile(fileId).getBody());
+            outputStream.write(controller.downloadFile(reportId).getBody());
         }
 
         org.documentoviscode.splashyapi.utility.fileconversion.Document jsonDoc =
