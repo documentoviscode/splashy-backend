@@ -50,7 +50,7 @@ public class MonthlyReportService {
                         .filter(pc -> (pc.getEndDate()).isAfter(LocalDate.now()))
                         .findAny();
 
-                partnershipContract.ifPresent(contract -> mr.setRevenue(mr.getHoursWatched() * contract.getRate()));
+                partnershipContract.ifPresent(contract -> mr.setRevenue(mr.getDonations() * contract.getRate()));
             }
         }
         );
