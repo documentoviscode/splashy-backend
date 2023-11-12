@@ -15,4 +15,6 @@ public class PartnershipContractDTO {
     private LocalDate endDate;
     private Double rate;
     private Double donationPercentage;
+    private Boolean contractExtensionInProgress;
+    private Boolean contractExtensionOfferVisible;
 }
