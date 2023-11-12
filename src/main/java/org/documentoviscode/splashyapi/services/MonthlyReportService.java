@@ -113,9 +113,6 @@ public class MonthlyReportService {
                     if (updatedMonthlyReport.getDonations() != null) {
                         monthlyReportToUpdate.setDonations(updatedMonthlyReport.getDonations());
                     }
-                    if (updatedMonthlyReport.getRevenue() != null) {
-                        monthlyReportToUpdate.setDonations(updatedMonthlyReport.getRevenue());
-                    }
                     return monthlyReportRepository.save(monthlyReportToUpdate);
                 })
                 .orElse(null);
