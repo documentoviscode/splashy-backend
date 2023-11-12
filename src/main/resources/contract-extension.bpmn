@@ -421,7 +421,7 @@
           <zeebe:input source="PATCH" target="method" />
           <zeebe:input source="=&#34;https://documentovisco-api-81f19f7a148a.herokuapp.com/api/v1/partnershipContracts/&#34; + idContract" target="url" />
           <zeebe:input source="20" target="connectionTimeoutInSeconds" />
-          <zeebe:input source="{&#34;contractExtensionOfferVisible&#34;:true}" target="body" />
+          <zeebe:input source="={&#34;contractExtensionOfferVisible&#34;:true}" target="body" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="retryBackoff" value="PT0S" />
@@ -438,7 +438,7 @@
           <zeebe:input source="PATCH" target="method" />
           <zeebe:input source="=&#34;https://documentovisco-api-81f19f7a148a.herokuapp.com/api/v1/partnershipContracts/&#34; + idContract" target="url" />
           <zeebe:input source="20" target="connectionTimeoutInSeconds" />
-          <zeebe:input source="{&#34;contractExtensionInProgress&#34;:false,&#34;contractExtensionOfferVisible&#34;:false}" target="body" />
+          <zeebe:input source="={&#34;contractExtensionInProgress&#34;:false,&#34;contractExtensionOfferVisible&#34;:false}" target="body" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
           <zeebe:header key="retryBackoff" value="PT0S" />
