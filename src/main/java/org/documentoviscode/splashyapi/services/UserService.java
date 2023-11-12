@@ -1,6 +1,7 @@
 package org.documentoviscode.splashyapi.services;
 
 
+import org.documentoviscode.splashyapi.domain.Document;
 import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,5 +63,21 @@ public class UserService {
      */
     public Optional<User> findAdminById(Long id) {
         return userRepository.findAdminById(id);
+    }
+
+    /**
+     * Add a document to the list of documents associated with a user.
+     *
+     * @param user     The user to associate the document with.
+     * @param document The document to add to the user's documents.
+     */
+    public void addDocumentToUser(User user, Document document) {
+        List<Document> userDocuments = user.getDocuments();
+
+        if (!userDocuments.contains(document)) {
+            userDocuments.add(document);
+            user.setDocuments(userDocuments);
+            userRepository.save(user);
+        }
     }
 }
