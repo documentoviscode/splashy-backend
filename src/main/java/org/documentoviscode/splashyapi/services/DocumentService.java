@@ -44,4 +44,15 @@ public class DocumentService {
     public List<Document> findAll() {
         return documentRepository.findAll();
     }
+
+    /**
+     * Add a new document to the repository.
+     *
+     * @param document The document to be added.
+     * @return The added document.
+     */
+    public Document create(Document document) {
+        return documentRepository.save(document);
+    }
+
 }
