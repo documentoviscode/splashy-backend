@@ -368,7 +368,9 @@
       <bpmn:outgoing>Flow_1fb1p5j</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:userTask id="Activity_0rahpjg" name="Edycja umowy i stworzenie nowej oferty">
-      <bpmn:extensionElements />
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition candidateGroups="documentoviscoAdmin" />
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1fb1p5j</bpmn:incoming>
       <bpmn:outgoing>Flow_1tbbdt8</bpmn:outgoing>
     </bpmn:userTask>
@@ -379,7 +381,9 @@
     </bpmn:exclusiveGateway>
     <bpmn:userTask id="Activity_1ptrc63" name="Przegląd oferty">
       <bpmn:documentation>Partner weryfikuje, czy oferta jest przez niego akceptowalna</bpmn:documentation>
-      <bpmn:extensionElements />
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition candidateGroups="documentoviscoUser" />
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1yvapen</bpmn:incoming>
       <bpmn:outgoing>Flow_0yi565q</bpmn:outgoing>
     </bpmn:userTask>
@@ -400,6 +404,7 @@
         <zeebe:ioMapping>
           <zeebe:output source="=contractReview" target="contractReview" />
         </zeebe:ioMapping>
+        <zeebe:assignmentDefinition candidateGroups="documentoviscoAdmin" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1vaffxg</bpmn:incoming>
       <bpmn:outgoing>Flow_0kbscdx</bpmn:outgoing>
