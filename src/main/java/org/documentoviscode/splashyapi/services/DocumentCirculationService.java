@@ -78,7 +78,7 @@ public class DocumentCirculationService {
                 .join();
     }
 
-    public void completeActivityReviewTask() throws TaskListException {
+    public void completeAdminReviewTask(Boolean approval) throws TaskListException {
 
         TaskSearch ts = new TaskSearch()
                 .setGroup("documentoviscoAdmin")
@@ -86,6 +86,15 @@ public class DocumentCirculationService {
 
         TaskList tasks = taskListClient.getTasks(ts);
 
-        taskListClient.completeTask(tasks.get(0).getId(), Map.of("contractReview", "approved"));
+        taskListClient.completeTask(tasks.get(0).getId(), Map.of("contractReview",  approval ? "approved" : "rejected"));
+    }
+
+    public void completeUserReviewTask(Boolean approval) throws TaskListException {
+        TaskSearch ts = new TaskSearch()
+                .setGroup("documentoviscoUser")
+                .setTaskDefinitionId("Activity_1ptrc63");
+        TaskList tasks = taskListClient.getTasks(ts);
+
+        taskListClient.completeTask(tasks.get(0).getId(), Map.of("partnerOfferReview",  approval ? "accepted" : "rejected"));
     }
 }

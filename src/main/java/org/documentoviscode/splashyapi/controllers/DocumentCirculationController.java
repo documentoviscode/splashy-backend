@@ -4,6 +4,7 @@ import io.camunda.tasklist.exception.TaskListException;
 import lombok.AllArgsConstructor;
 import org.documentoviscode.splashyapi.services.DocumentCirculationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,10 +24,20 @@ public class DocumentCirculationController {
         return ResponseEntity.ok("200 okiej");
     }
 
-    @PostMapping("/activityReview")
-    public ResponseEntity<String> completeActivityReview() {
+    @PostMapping("/adminReview/{approval}")
+    public ResponseEntity<String> completeAdminReview(@PathVariable("approval") Boolean approval) {
         try {
-            documentCirculationService.completeActivityReviewTask();
+            documentCirculationService.completeAdminReviewTask(approval);
+        } catch ( TaskListException e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseEntity.ok("200 okiej");
+    }
+
+    @PostMapping("/userReview/{approval}")
+    public ResponseEntity<String> completeUserReview(@PathVariable("approval") Boolean approval) {
+        try {
+            documentCirculationService.completeUserReviewTask(approval);
         } catch ( TaskListException e) {
             throw new RuntimeException(e);
         }
