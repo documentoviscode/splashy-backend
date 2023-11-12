@@ -5,9 +5,14 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
 import org.documentoviscode.splashyapi.data.CustomMultipartFile;
+import org.documentoviscode.splashyapi.services.MonthlyReportService;
 import org.documentoviscode.splashyapi.utility.fileconversion.DataJSON;
 import org.json.simple.JSONObject;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -25,17 +31,20 @@ import java.util.Map;
 @RestController
 public class DocumentConversionController{
     private final ApplicationContext applicationContext;
+    private final MonthlyReportService monthlyReportService;
+    private final GoogleDriveController googleDriveController;
 
     @GetMapping(value = { "/monthlyReportPartner/{reportId}" })
-    public String generatePartnerMonthlyReport(@PathVariable(name = "reportId") String reportId) throws Exception {
+    public ResponseEntity<byte[]> generatePartnerMonthlyReport(@PathVariable(name = "reportId") Long reportId) throws Exception {
         String reportPath = "src/main/resources/";
         String downloadedFileName = "downloaded.json";
 
-        GoogleDriveController controller = applicationContext.getBean(GoogleDriveController.class);
+        String fileId = monthlyReportService.findMonthlyReportById(reportId).get().getGDriveLink();
+        googleDriveController.listFiles().getFiles();
 
         File downloaded = new File(reportPath + downloadedFileName);
         try (FileOutputStream outputStream = new FileOutputStream(downloaded)) {
-            outputStream.write(controller.downloadFile(reportId).getBody());
+            outputStream.write(googleDriveController.downloadFile(fileId).getBody());
         }
 
         org.documentoviscode.splashyapi.utility.fileconversion.Document jsonDoc =
@@ -108,8 +117,12 @@ public class DocumentConversionController{
         document.close();
         outputStream.close();
 
-        String documentId = controller.createFile(new CustomMultipartFile(Paths.get(reportPath + reportFileName)));
+        byte[] fileContent = Files.readAllBytes(Path.of(reportPath + reportFileName));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/pdf"));
+        headers.setContentDispositionFormData("attachment", reportFileName);
+
         new File(reportPath + reportFileName).delete();
-        return documentId;
+        return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
     }
 }
