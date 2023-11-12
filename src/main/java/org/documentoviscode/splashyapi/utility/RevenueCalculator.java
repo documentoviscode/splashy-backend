@@ -17,7 +17,7 @@ public class RevenueCalculator {
                     .filter(pc -> (pc.getEndDate()).isAfter(LocalDate.now()))
                     .findAny();
 
-            return partnershipContract.map(contract -> monthlyReport.getDonations() * contract.getRate()).orElse(0.0);
+            return partnershipContract.map(contract -> Math.round(monthlyReport.getDonations() * contract.getRate() * 100.0) / 100.0).orElse(0.0);
         }
         else return 0.0;
     }
