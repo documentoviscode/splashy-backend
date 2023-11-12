@@ -91,6 +91,9 @@ public class PartnershipContractService {
                     if (updatedContract.getDonationPercentage() != null) {
                         contractToUpdate.setDonationPercentage(updatedContract.getDonationPercentage());
                     }
+                    if (updatedContract.getContractExtensionInProgress() != null) {
+                        contractToUpdate.setContractExtensionInProgress(updatedContract.getContractExtensionInProgress());
+                    }
                     return partnershipContractRepository.save(contractToUpdate);
                 })
                 .orElse(null);

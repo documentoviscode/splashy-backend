@@ -40,6 +40,7 @@ public class CreatePartnershipContractDto {
                 .endDate(request.getEndDate())
                 .rate(request.getRate())
                 .donationPercentage(request.getDonationPercentage())
+                .contractExtensionInProgress(false)
                 .build();
     }
 }
