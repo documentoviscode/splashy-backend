@@ -54,7 +54,7 @@ public class EmailService {
 
     public void sendShortenedFacture(String to, String username, String packageName, String packagePrice) throws MessagingException {
         MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
         helper.setFrom("ssplashytv@gmail.com");
         helper.setTo(to);
@@ -68,6 +68,9 @@ public class EmailService {
 
         String htmlContent = templateEngine.process("email", context);
         helper.setText(htmlContent, true);
+
+        FileSystemResource file = new FileSystemResource(new File("Facture.pdf"));
+        helper.addAttachment("Facture.pdf", file);
 
         emailSender.send(mimeMessage);
     }
