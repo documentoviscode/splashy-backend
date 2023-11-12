@@ -1,15 +1,22 @@
 package org.documentoviscode.splashyapi.services;
 
 import org.documentoviscode.splashyapi.data.requests.MonthlyReportDTO;
+import org.documentoviscode.splashyapi.domain.Document;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
+import org.documentoviscode.splashyapi.domain.Partner;
+import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.repositories.MonthlyReportRepository;
+import org.documentoviscode.splashyapi.utility.RevenueCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Service class for managing monthly report-related operations.
@@ -35,7 +42,9 @@ public class MonthlyReportService {
      * @return Optional containing the monthly report or an empty optional if the report is not found.
      */
     public Optional<MonthlyReport> findMonthlyReportById(Long id) {
-        return monthlyReportRepository.findById(id);
+        Optional<MonthlyReport> monthlyReport = monthlyReportRepository.findById(id);
+        monthlyReport.ifPresent(mr -> mr.setRevenue(RevenueCalculator.calculateRevenue(mr)));
+        return monthlyReport;
     }
 
     /**
@@ -44,7 +53,9 @@ public class MonthlyReportService {
      * @return List of all monthly report entities.
      */
     public List<MonthlyReport> findAll() {
-        return monthlyReportRepository.findAll();
+        return monthlyReportRepository.findAll().stream()
+                .peek(monthlyReport -> monthlyReport.setRevenue(RevenueCalculator.calculateRevenue(monthlyReport)))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -97,7 +108,7 @@ public class MonthlyReportService {
                     return monthlyReportRepository.save(monthlyReportToUpdate);
                 })
                 .orElse(null);
-
     }
+
 
 }
