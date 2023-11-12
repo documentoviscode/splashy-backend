@@ -26,19 +26,6 @@ public class Bootstrap implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println("Running bootstrap...");
 
-//        monthlyReportService.create(
-//                MonthlyReport.builder()
-//                        .type(DocFormat.PDF)
-//                        .creationDate(LocalDate.of(2023, 1, 1))
-//                        .startDate(LocalDate.of(2023, 9, 1))
-//                        .endDate(LocalDate.of(2023, 9, 30))
-//                        .viewers(1111)
-//                        .hoursWatched(45649.5)
-//                        .donations(123123)
-//                        .user(userService.findUserById(3L).get())
-//                        .build()
-//        );
-
         System.out.println("Bootstrap has finished");
     }
 }
