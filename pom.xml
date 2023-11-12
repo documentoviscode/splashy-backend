@@ -96,6 +96,12 @@
             <artifactId>zeebe-client-java</artifactId>
             <version>8.3.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.camunda</groupId>
+            <artifactId>camunda-tasklist-client-java</artifactId>
+            <version>8.3.1.2</version>
+        </dependency>
     </dependencies>
 
     <build>
