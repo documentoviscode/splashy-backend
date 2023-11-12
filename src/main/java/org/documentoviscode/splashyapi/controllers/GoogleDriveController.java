@@ -19,6 +19,12 @@ import com.google.api.services.drive.model.FileList;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.documentoviscode.splashyapi.config.DocFormat;
+import org.documentoviscode.splashyapi.domain.Document;
+import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.services.DocumentService;
+import org.documentoviscode.splashyapi.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -35,8 +41,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class GoogleDriveController {
@@ -57,6 +65,15 @@ public class GoogleDriveController {
     private Resource credentialsFolder;
 
     private GoogleAuthorizationCodeFlow flow;
+
+    private UserService userService;
+    private DocumentService documentService;
+
+    @Autowired
+    public GoogleDriveController(UserService userService, DocumentService documentService) {
+        this.userService = userService;
+        this.documentService = documentService;
+    }
 
     /**
      * Initializes the Google Drive controller.
@@ -166,7 +183,7 @@ public class GoogleDriveController {
      * @throws Exception If an error occurs while uploading the file to Google Drive.
      */
     @PostMapping(value = { "/create" })
-    public String createFile(@RequestParam("file") MultipartFile file) throws Exception {
+    public String createFile(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId) throws Exception {
         Credential credential = flow.loadCredential(USER_IDENTIFIER_KEY);
         Drive drive = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).build();
 
@@ -179,10 +196,53 @@ public class GoogleDriveController {
                     .setFields("id")
                     .execute();
             System.out.println("File ID: " + uploadedFile.getId());
+            createDocumentForUser(userId, uploadedFile.getId(), determineDocFormat(mediaContent.getType()));
             return uploadedFile.getId();
         } catch (GoogleJsonResponseException e) {
             System.err.println("Unable to upload file: " + e.getDetails());
             throw e;
         }
     }
+
+    /**
+     * Creates a document for a specific user with the given parameters.
+     *
+     * @param userId   The ID of the user for whom the document is being created.
+     * @param GDriveId The Google Drive ID associated with the document.
+     * @param type     The format/type of the document.
+     * @throws IllegalArgumentException If the user with the provided ID is not found.
+     */
+    private void createDocumentForUser(Long userId, String GDriveId, DocFormat type) {
+        Optional<User> userOptional = userService.findUserById(userId);
+        User user = userOptional.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        Document newDocument = Document.builder()
+                .type(type)
+                .GDriveLink(GDriveId)
+                .creationDate(LocalDate.now())
+                .user(user)
+                .build();
+
+        documentService.create(newDocument);
+        userService.addDocumentToUser(user, newDocument);
+    }
+
+    /**
+     * Determines the DocFormat based on the provided MIME type.
+     *
+     * @param mimeType The MIME type of the file.
+     * @return The corresponding DocFormat.
+     * @throws IllegalArgumentException If the MIME type is not supported.
+     */
+    private DocFormat determineDocFormat(String mimeType) {
+        return switch (mimeType) {
+            case "application/pdf" -> DocFormat.PDF;
+            case "text/csv" -> DocFormat.CSV;
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> DocFormat.DOCX;
+            case "application/json" -> DocFormat.JSON;
+            case "application/xml" -> DocFormat.XML;
+            default -> throw new IllegalArgumentException("Unsupported MIME type: " + mimeType);
+        };
+    }
+
 }
