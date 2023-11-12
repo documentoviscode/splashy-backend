@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -69,7 +70,7 @@ public class EmailService {
         String htmlContent = templateEngine.process("email", context);
         helper.setText(htmlContent, true);
 
-        FileSystemResource file = new FileSystemResource(new File("Facture.pdf"));
+        ClassPathResource file = new ClassPathResource("Facture.pdf");
         helper.addAttachment("Facture.pdf", file);
 
         emailSender.send(mimeMessage);
