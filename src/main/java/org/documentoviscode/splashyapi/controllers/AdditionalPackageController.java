@@ -2,6 +2,8 @@ package org.documentoviscode.splashyapi.controllers;
 
 
 
+import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
 import org.documentoviscode.splashyapi.data.requests.AdditionalPackageDTO;
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
 import org.documentoviscode.splashyapi.domain.Subscription;
@@ -9,6 +11,7 @@ import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.dto.CreateAdditionalPackageDto;
 import org.documentoviscode.splashyapi.services.AdditionalPackageService;
 import org.documentoviscode.splashyapi.services.UserService;
+import org.documentoviscode.splashyapi.utility.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,21 +24,12 @@ import java.util.Optional;
  * REST controller for managing additional packages-related operations.
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/additionalPackages")
 public class AdditionalPackageController {
     private final AdditionalPackageService additionalPackageService;
     private final UserService userService;
-
-    /**
-     * Constructor for the AdditionalPackageController class.
-     *
-     * @param additionalPackageService The service for managing additional package-related operations.
-     */
-    @Autowired
-    public AdditionalPackageController(AdditionalPackageService additionalPackageService, UserService userService) {
-        this.additionalPackageService = additionalPackageService;
-        this.userService = userService;
-    }
+    private final EmailService emailService;
 
     /**
      * Retrieve a list of all additional packages.
@@ -67,8 +61,7 @@ public class AdditionalPackageController {
      * @return ResponseEntity containing the created additional package and HTTP status.
      */
     @PostMapping
-    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody CreateAdditionalPackageDto additionalPackageDto, @RequestParam Long userId )
-    {
+    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody CreateAdditionalPackageDto additionalPackageDto, @RequestParam Long userId ) throws MessagingException {
         Optional<User> userOptional = userService.findUserById(userId);
 
         if(userOptional.isPresent())
@@ -82,6 +75,9 @@ public class AdditionalPackageController {
 
             if(createdAdditionalPackage!=null)
             {
+                Double price = Math.ceil((createdAdditionalPackage.getPrice() * 123d)) / 100.0;
+                String stringPrice = String.format("%.2f", price);
+                emailService.sendShortenedFacture("michalziemiec@wp.pl", userOptional.get().getName(), createdAdditionalPackage.getPackageType(), stringPrice);
                 return new ResponseEntity<>(createdAdditionalPackage, HttpStatus.CREATED);
             }
             else
