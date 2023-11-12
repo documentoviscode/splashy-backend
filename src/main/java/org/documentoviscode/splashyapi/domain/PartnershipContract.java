@@ -49,4 +49,10 @@ public class PartnershipContract extends Document {
      */
     @Column
     private Boolean contractExtensionInProgress;
+
+    /**
+     * Is contract offer visible to partner
+     */
+    @Column
+    private Boolean contractExtensionOfferVisible;
 }

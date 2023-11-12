@@ -16,4 +16,5 @@ public class PartnershipContractDTO {
     private Double rate;
     private Double donationPercentage;
     private Boolean contractExtensionInProgress;
+    private Boolean contractExtensionOfferVisible;
 }

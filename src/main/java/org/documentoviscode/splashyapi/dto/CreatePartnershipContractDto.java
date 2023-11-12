@@ -41,6 +41,7 @@ public class CreatePartnershipContractDto {
                 .rate(request.getRate())
                 .donationPercentage(request.getDonationPercentage())
                 .contractExtensionInProgress(false)
+                .contractExtensionOfferVisible(false)
                 .build();
     }
 }
