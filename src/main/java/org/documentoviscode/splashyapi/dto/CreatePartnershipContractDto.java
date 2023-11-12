@@ -1,12 +1,10 @@
 package org.documentoviscode.splashyapi.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.documentoviscode.splashyapi.config.DocFormat;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 
-import java.time.LocalDate;
 import java.time.LocalDate;
 import java.util.function.Function;
 
@@ -22,13 +20,10 @@ public class CreatePartnershipContractDto {
 
     private String GDriveLink;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate creationDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
     private double rate;

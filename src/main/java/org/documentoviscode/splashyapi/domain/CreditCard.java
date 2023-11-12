@@ -1,13 +1,10 @@
 package org.documentoviscode.splashyapi.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
 import java.time.LocalDate;
 
 /**
@@ -45,6 +42,5 @@ public class CreditCard {
      * The expiration date of the credit card.
      */
     @Column
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expirationDate;
 }

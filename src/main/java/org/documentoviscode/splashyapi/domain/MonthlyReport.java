@@ -1,14 +1,11 @@
 package org.documentoviscode.splashyapi.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-
 /**
  * Entity class representing monthly reports.
  */
@@ -26,14 +23,12 @@ public class MonthlyReport extends Document {
      * The start date of the monthly report.
      */
     @Column
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
 
     /**
      * The end date of the monthly report.
      */
     @Column
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
     /**

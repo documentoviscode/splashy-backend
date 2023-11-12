@@ -1,13 +1,10 @@
 package org.documentoviscode.splashyapi.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.documentoviscode.splashyapi.config.DocFormat;
 import org.documentoviscode.splashyapi.domain.AdditionalPackage;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
 import java.time.LocalDate;
 import java.util.function.Function;
 
@@ -23,7 +20,6 @@ public class CreateAdditionalPackageDto {
 
     private String GDriveLink;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate creationDate;
 
     private String packageType;
