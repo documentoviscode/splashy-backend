@@ -1,5 +1,7 @@
 package org.documentoviscode.splashyapi.data.requests;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.documentoviscode.splashyapi.config.DocFormat;
 
 import java.time.LocalDate;
@@ -7,6 +9,8 @@ import java.time.LocalDate;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class PartnershipContractDTO {
     private DocFormat type;
     private String GDriveLink;
