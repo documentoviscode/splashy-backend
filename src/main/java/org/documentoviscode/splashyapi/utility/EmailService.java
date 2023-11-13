@@ -53,7 +53,7 @@ public class EmailService {
         emailSender.send(mimeMessage);
     }
 
-    public void sendShortenedFacture(String to, String username, String packageName, String packagePrice) throws MessagingException {
+    public void sendInvoice(String to, String username, String packageName, String packagePrice, String pathToAttachment) throws MessagingException {
         MimeMessage mimeMessage = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
@@ -70,8 +70,8 @@ public class EmailService {
         String htmlContent = templateEngine.process("email", context);
         helper.setText(htmlContent, true);
 
-        ClassPathResource file = new ClassPathResource("Facture.pdf");
-        helper.addAttachment("Facture.pdf", file);
+        FileSystemResource file = new FileSystemResource(new File(pathToAttachment));
+        helper.addAttachment("Invoice.pdf", file);
 
         emailSender.send(mimeMessage);
     }
