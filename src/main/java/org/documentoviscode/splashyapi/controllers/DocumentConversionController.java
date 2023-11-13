@@ -79,7 +79,7 @@ public class DocumentConversionController{
                 new org.documentoviscode.splashyapi.utility.fileconversion.Document(data);
         docJSON.saveTo(template);
 
-        String fileId = googleDriveController.createFile(new CustomMultipartFile(Path.of(template)));
+        String fileId = googleDriveController.createFile(new CustomMultipartFile(Path.of(template)), report.getUser().getId());
         report.setGDriveLink(fileId);
         MonthlyReportDTO updated = new MonthlyReportDTO();
         updated.setGDriveLink(fileId);

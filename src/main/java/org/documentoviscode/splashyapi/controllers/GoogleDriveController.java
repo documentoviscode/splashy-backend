@@ -19,6 +19,12 @@ import com.google.api.services.drive.model.FileList;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.documentoviscode.splashyapi.config.DocFormat;
+import org.documentoviscode.splashyapi.domain.Document;
+import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.services.DocumentService;
+import org.documentoviscode.splashyapi.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -57,6 +63,15 @@ public class GoogleDriveController {
     private Resource credentialsFolder;
 
     private GoogleAuthorizationCodeFlow flow;
+
+    private UserService userService;
+    private DocumentService documentService;
+
+    @Autowired
+    public GoogleDriveController(UserService userService, DocumentService documentService) {
+        this.userService = userService;
+        this.documentService = documentService;
+    }
 
     /**
      * Initializes the Google Drive controller.
@@ -151,6 +166,17 @@ public class GoogleDriveController {
 
         try {
             FileList fileList = drive.files().list().execute();
+
+            List<Document> allDocuments = documentService.findAll();
+            for (Document d : allDocuments) {
+                System.out.println(d);
+                System.out.println(d.getGDriveLink());
+            }
+            List<User> users = userService.findAll();
+            for (User u : users) {
+                System.out.println(u.getDocuments());
+            }
+
             return fileList;
         } catch (GoogleJsonResponseException e) {
             System.err.println("Unable to list files: " + e.getDetails());
@@ -166,7 +192,7 @@ public class GoogleDriveController {
      * @throws Exception If an error occurs while uploading the file to Google Drive.
      */
     @PostMapping(value = { "/create" })
-    public String createFile(@RequestParam("file") MultipartFile file) throws Exception {
+    public String createFile(@RequestParam("file") MultipartFile file, @RequestParam("userId") Long userId) throws Exception {
         Credential credential = flow.loadCredential(USER_IDENTIFIER_KEY);
         Drive drive = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).build();
 
@@ -179,10 +205,31 @@ public class GoogleDriveController {
                     .setFields("id")
                     .execute();
             System.out.println("File ID: " + uploadedFile.getId());
+            Document newDocument = documentService.create(userId, uploadedFile.getId(), determineDocFormat(mediaContent.getType()));
+            userService.addDocumentToUser(userId, newDocument);
             return uploadedFile.getId();
         } catch (GoogleJsonResponseException e) {
             System.err.println("Unable to upload file: " + e.getDetails());
             throw e;
         }
     }
+
+    /**
+     * Determines the DocFormat based on the provided MIME type.
+     *
+     * @param mimeType The MIME type of the file.
+     * @return The corresponding DocFormat.
+     * @throws IllegalArgumentException If the MIME type is not supported.
+     */
+    private DocFormat determineDocFormat(String mimeType) {
+        return switch (mimeType) {
+            case "application/pdf" -> DocFormat.PDF;
+            case "text/csv" -> DocFormat.CSV;
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> DocFormat.DOCX;
+            case "application/json" -> DocFormat.JSON;
+            case "application/xml" -> DocFormat.XML;
+            default -> throw new IllegalArgumentException("Unsupported MIME type: " + mimeType);
+        };
+    }
+
 }
