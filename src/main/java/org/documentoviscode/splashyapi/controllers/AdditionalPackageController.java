@@ -2,6 +2,7 @@ package org.documentoviscode.splashyapi.controllers;
 
 
 
+import com.itextpdf.text.DocumentException;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.documentoviscode.splashyapi.data.requests.AdditionalPackageDTO;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,6 +32,7 @@ public class AdditionalPackageController {
     private final AdditionalPackageService additionalPackageService;
     private final UserService userService;
     private final EmailService emailService;
+    private final DocumentConversionController documentConversionController;
 
     /**
      * Retrieve a list of all additional packages.
@@ -61,7 +64,7 @@ public class AdditionalPackageController {
      * @return ResponseEntity containing the created additional package and HTTP status.
      */
     @PostMapping
-    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody CreateAdditionalPackageDto additionalPackageDto, @RequestParam Long userId ) throws MessagingException {
+    public ResponseEntity<AdditionalPackage> createAdditionalPackage(@RequestBody CreateAdditionalPackageDto additionalPackageDto, @RequestParam Long userId ) throws MessagingException, DocumentException, IOException {
         Optional<User> userOptional = userService.findUserById(userId);
 
         if(userOptional.isPresent())
@@ -75,9 +78,7 @@ public class AdditionalPackageController {
 
             if(createdAdditionalPackage!=null)
             {
-                Double price = Math.ceil((createdAdditionalPackage.getPrice() * 123d)) / 100.0;
-                String stringPrice = String.format("%.2f", price);
-                emailService.sendShortenedFacture("documentovisco@gmail.com", userOptional.get().getName(), createdAdditionalPackage.getPackageType(), stringPrice);
+                documentConversionController.sendInvoice(newAdditionalPackage.getId());
                 return new ResponseEntity<>(createdAdditionalPackage, HttpStatus.CREATED);
             }
             else

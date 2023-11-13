@@ -1,16 +1,21 @@
 package org.documentoviscode.splashyapi.controllers;
 
 import com.itextpdf.text.*;
-import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.documentoviscode.splashyapi.data.CustomMultipartFile;
 import org.documentoviscode.splashyapi.data.requests.MonthlyReportDTO;
+import org.documentoviscode.splashyapi.domain.AdditionalPackage;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
+import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.services.AdditionalPackageService;
 import org.documentoviscode.splashyapi.services.MonthlyReportService;
 import org.documentoviscode.splashyapi.services.PartnershipContractService;
+import org.documentoviscode.splashyapi.services.UserService;
+import org.documentoviscode.splashyapi.utility.EmailService;
 import org.documentoviscode.splashyapi.utility.fileconversion.DataJSON;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
@@ -29,13 +34,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDate;
 import java.util.Optional;
 
 
@@ -45,6 +50,9 @@ public class DocumentConversionController{
     private final MonthlyReportService monthlyReportService;
     private final GoogleDriveController googleDriveController;
     private final PartnershipContractService partnershipContractService;
+    private final EmailService emailService;
+    private final AdditionalPackageService additionalPackageService;
+    private final UserService userService;
 
     private String generateMonthlyReport(Long reportId) throws Exception {
         MonthlyReport report = monthlyReportService.findMonthlyReportById(reportId).get();
@@ -179,109 +187,93 @@ public class DocumentConversionController{
         return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
     }
 
-    @GetMapping(value = { "/monthlyReportCompany/{reportId}" })
-    public ResponseEntity<byte[]> generateMonthlyReportDOCX(@PathVariable(name = "reportId") Long reportId) throws Exception {
-        String reportPath = "src/main/resources/";
-        String downloadedFileName = "downloaded.json";
+    public void sendInvoice(Long packageId) throws MessagingException, IOException, DocumentException {
+        AdditionalPackage addPackage = additionalPackageService.findAdditionalPackageById(packageId).get();
+        User user = addPackage.getUser();
 
-        String fileId = monthlyReportService.findMonthlyReportById(reportId).get().getGDriveLink();
-        if (fileId == null || fileId.startsWith("<GLinkDrive")) fileId = generateMonthlyReport(reportId);
+        String fileName = "src/main/resources/faktura.pdf";
 
-        File downloaded = new File(reportPath + downloadedFileName);
-        try (FileOutputStream outputStream = new FileOutputStream(downloaded)) {
-            outputStream.write(googleDriveController.downloadFile(fileId).getBody());
-        }
+        com.itextpdf.text.Document document = new com.itextpdf.text.Document();
+        FileOutputStream outputStream = new FileOutputStream(fileName);
+        PdfWriter.getInstance(document, outputStream);
 
-        org.documentoviscode.splashyapi.utility.fileconversion.Document jsonDoc =
-                new org.documentoviscode.splashyapi.utility.fileconversion.Document();
-        jsonDoc.readFrom(reportPath + downloadedFileName);
-        JSONObject data = ((DataJSON)jsonDoc.getData()).getKeys();
-        downloaded.delete();
+        Font fontHeader1 = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, BaseColor.BLACK);
+        Font fontHeader2 = FontFactory.getFont(FontFactory.HELVETICA, 16, 4, BaseColor.BLACK);
+        Font fontBig = FontFactory.getFont(FontFactory.HELVETICA, 14, BaseColor.BLACK);
+        Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
+        Font fontTable = FontFactory.getFont("Verdana", 11, BaseColor.DARK_GRAY);
+        document.open();
 
-        String reportFileName = "monthlyReport_" + data.get("creationDate") + ".pdf";
+        document.add(new Paragraph("Faktura nr: " + packageId + "/2023", fontHeader1));
+        document.add(new Paragraph("\n"));
+        document.add(new Paragraph("Wystawiona w dniu: " + LocalDate.now() + ", Gdańsk", fontNormal));
+        document.add(new Paragraph("\n\n\n"));
 
-        WordprocessingMLPackage wordPackage = WordprocessingMLPackage.createPackage();
-        MainDocumentPart mainDocumentPart = wordPackage.getMainDocumentPart();
+        PdfPTable table = new PdfPTable(2);
+        table.addCell(new Phrase("Sprzedawca", fontHeader2));
+        table.addCell(new Phrase("Nabywca", fontHeader2));
+        table.addCell(new Paragraph("""
+                splashyTV sp. z o.o.
+                al. Grunwaldzka 420/69
+                80-888 Gdańsk
+                NIP 887-116-00-53
+                splashytv.net""", fontBig));
+        table.addCell(new Paragraph(user.getName() + "\n" + user.getSurname() + "\n" + user.getEmail(), fontBig));
+        document.add(table);
+        Paragraph p = new Paragraph("\n\n\n\nSposób zapłaty: karta płatnicza o nr **** **** **** 1234\n\n", fontNormal);
+        p.setAlignment(Element.ALIGN_CENTER);
+        document.add(p);
 
-        mainDocumentPart.addStyledParagraphOfText("Title", "Monthly Report");
-        mainDocumentPart.addParagraphOfText("Date from: " + data.get("startDate"));
-        mainDocumentPart.addParagraphOfText("Date to: " + data.get("endDate"));
-        mainDocumentPart.addParagraphOfText("");
-        mainDocumentPart.addParagraphOfText("Partner:");
-        mainDocumentPart.addParagraphOfText("Name: " + data.get("partnerName"));
-        mainDocumentPart.addParagraphOfText("Surname: " + data.get("partnerSurname"));
-        mainDocumentPart.addParagraphOfText("E-mail: " + data.get("partnerEmail"));
+        double price = addPackage.getPrice();
+        double vat = 23.0 / 77.0;
+        table = new PdfPTable(6);
+        table.addCell(new Phrase("Nazwa usługi", fontTable));
+        table.addCell(new Phrase("Ilość", fontTable));
+        table.addCell(new Phrase("Cena netto", fontTable));
+        table.addCell(new Phrase("VAT %", fontTable));
+        table.addCell(new Phrase("Kwota VAT", fontTable));
+        table.addCell(new Phrase("Wartość brutto", fontTable));
 
-        ObjectFactory factory = Context.getWmlObjectFactory();
-        P p = factory.createP();
-        R r = factory.createR();
-        Text t = factory.createText();
-        r.getContent().add(t);
-        p.getContent().add(r);
+        table.addCell(new Phrase(addPackage.getPackageType(), fontTable));
+        table.addCell(new Phrase("1", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", price) + " PLN", fontTable));
+        table.addCell(new Phrase("23 %", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable));
 
-        int writableWidthTwips = wordPackage.getDocumentModel()
-                .getSections().get(0).getPageDimensions().getWritableWidthTwips();
-        int columnNumber = 2;
-        Tbl tbl = TblFactory.createTable(3, columnNumber, writableWidthTwips/columnNumber);
-        addCellContent(tbl, 0, 0, "Number of viewers");
-        addCellContent(tbl, 0, 1, data.get("viewers").toString());
-        addCellContent(tbl, 1, 0, "Number of hours watched");
-        addCellContent(tbl, 1, 1, data.get("hoursWatched").toString());
-        addCellContent(tbl, 2, 0, "Total donations");
-        addCellContent(tbl, 2, 1, data.get("donations") + " $");
+        table.addCell("");
+        table.addCell("");
+        table.addCell(new Phrase("Razem:", fontTable));
+        table.addCell("");
+        table.addCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable));
 
-        mainDocumentPart.addParagraphOfText("");
-        mainDocumentPart.getContent().add(tbl);
-        mainDocumentPart.addParagraphOfText("");
-        mainDocumentPart.addParagraphOfText("");
-        mainDocumentPart.addParagraphOfText("");
+        table.addCell("");
+        table.addCell("");
+        table.addCell(new Phrase("W tym:", fontTable));
+        table.addCell("23 %");
+        table.addCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable));
+        table.addCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable));
 
-        File image = new File("src/main/resources/images/documentovisco.png");
-        byte[] imageContent = Files.readAllBytes(image.toPath());
-        BinaryPartAbstractImage imagePart = BinaryPartAbstractImage
-                .createImagePart(wordPackage, imageContent);
-        Inline inline = imagePart.createImageInline("", "", 1, 2,
-                wordPackage.getDocumentModel().getSections().get(0).getPageDimensions().getWritableWidthTwips() / 3,
-                false);
-        P Imageparagraph = addImageToParagraph(inline);
-        mainDocumentPart.getContent().add(Imageparagraph);
+        document.add(table);
+        document.add(new Paragraph("\n\n\nRazem do zapłaty: " + String.format("%.2f", price * (1.0 + vat))
+                + " PLN\n\n\n", fontBig));
 
-        mainDocumentPart.addParagraphOfText("Documentovisco ©");
+        Path path = Paths.get("src/main/resources/images/documentovisco.png");
+        Image img = Image.getInstance(path.toAbsolutePath().toString());
+        img.scaleToFit(new Rectangle(0, 0, 210, 140));
+        img.setAlignment(Element.ALIGN_CENTER);
+        document.add(img);
 
+        Paragraph copyright = new Paragraph("Documentovisco ©", fontNormal);
+        copyright.setAlignment(Element.ALIGN_CENTER);
+        document.add(copyright);
 
-        File exportFile = new File(reportPath + reportFileName);
-        wordPackage.save(exportFile);
+        document.close();
+        outputStream.close();
 
-        byte[] fileContent = Files.readAllBytes(Path.of(reportPath + reportFileName));
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(
-                MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
-        headers.setContentDispositionFormData("attachment", reportFileName);
-
-        new File(reportPath + reportFileName).delete();
-        return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
-    }
-
-    private static void addCellContent(Tbl table, int row, int col, String value) {
-        ObjectFactory factory = Context.getWmlObjectFactory();
-        P p = factory.createP();
-        R r = factory.createR();
-        Text t = factory.createText();
-        t.setValue(value);
-        r.getContent().add(t);
-        p.getContent().add(r);
-
-        ((Tc)((Tr)table.getContent().get(row)).getContent().get(col)).getContent().add(p);
-    }
-
-    private static P addImageToParagraph(Inline inline) {
-        ObjectFactory factory = new ObjectFactory();
-        P p = factory.createP();
-        R r = factory.createR();
-        p.getContent().add(r);
-        Drawing drawing = factory.createDrawing();
-        r.getContent().add(drawing);
-        drawing.getAnchorOrInline().add(inline);
-        return p;
+        emailService.sendInvoice("documentovisco@gmail.com", user.getName(),
+                addPackage.getPackageType(), String.format("%.2f", price * (1.0 + vat)), fileName);
+        new File(fileName).delete();
     }
 }
