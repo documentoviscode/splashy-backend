@@ -1,9 +1,11 @@
 package org.documentoviscode.splashyapi.services;
 
+import org.documentoviscode.splashyapi.data.requests.SubscriptionDTO;
 import org.documentoviscode.splashyapi.domain.Subscription;
 import org.documentoviscode.splashyapi.repositories.SubscriptionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,5 +44,51 @@ public class SubscriptionService {
      */
     public List<Subscription> findAll() {
         return subscriptionRepository.findAll();
+    }
+
+    /**
+     * Create a new subscription by saving it to the repository.
+     *
+     * @param subscription The subscription to be created.
+     * @return The created subscription.
+     */
+    @Transactional
+    public Subscription create(Subscription subscription)
+    {
+        return subscriptionRepository.save(subscription);
+    }
+
+    /**
+     * Update an existing subscription.
+     *
+     * @param id             The ID of the subscription to be updated.
+     * @param updatedSubscription The updated subscription data.
+     * @return The updated subscription or null if the subscription with the specified ID is not found.
+     */
+    public Subscription updateSubscription(Long id, SubscriptionDTO updatedSubscription) {
+        return findSubscriptionById(id)
+                .map(subscriptionToUpdate -> {
+                    if (updatedSubscription.getType() != null) {
+                        subscriptionToUpdate.setType(updatedSubscription.getType());
+                    }
+                    if (updatedSubscription.getGDriveLink() != null) {
+                        subscriptionToUpdate.setGDriveLink(updatedSubscription.getGDriveLink());
+                    }
+                    if (updatedSubscription.getCreationDate() != null) {
+                        subscriptionToUpdate.setCreationDate(updatedSubscription.getCreationDate());
+                    }
+                    if (updatedSubscription.getStartDate() != null) {
+                        subscriptionToUpdate.setStartDate(updatedSubscription.getStartDate());
+                    }
+                    if (updatedSubscription.getPeriod() != null) {
+                        subscriptionToUpdate.setPeriod(updatedSubscription.getPeriod());
+                    }
+                    if (updatedSubscription.getMonthlyRate() != null) {
+                        subscriptionToUpdate.setMonthlyRate(updatedSubscription.getMonthlyRate());
+                    }
+                    return subscriptionRepository.save(subscriptionToUpdate);
+                })
+                .orElse(null);
+
     }
 }

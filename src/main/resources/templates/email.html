@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Witaj mail</title>
+    <style>
+#footer
+{
+    background-color: black;
+    color: darkgrey;
+    padding: 10px;
+}
+
+    </style>
+</head>
+<body>
+    <h1>Witaj, <span th:text="${username}">name</span>!</h1>
+    Dziękujemy, że zakupił<span th:text="${sexEnd}">e(a)</span>ś <b><span th:text="${package}">package_name</span></b>! <br>
+    Całkowita wartość zamówienia: <b><span th:text="${price}"> 0.00</span> zł.</b>
+    <br>
+    <br>
+    <hr>
+    <div id="footer">
+
+        SplashyTV&copy; 2023
+    </div>
+</body>
+</html>
+

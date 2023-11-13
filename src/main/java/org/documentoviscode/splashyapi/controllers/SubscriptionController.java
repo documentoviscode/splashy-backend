@@ -1,14 +1,17 @@
 package org.documentoviscode.splashyapi.controllers;
 
 
+import org.documentoviscode.splashyapi.data.requests.SubscriptionDTO;
 import org.documentoviscode.splashyapi.domain.Subscription;
+import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreateSubscriptionDto;
 import org.documentoviscode.splashyapi.services.SubscriptionService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +23,7 @@ import java.util.Optional;
 @RequestMapping("/subscriptions")
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
+    private final UserService userService;
 
     /**
      * Constructor for the SubscriptionController class.
@@ -27,8 +31,9 @@ public class SubscriptionController {
      * @param subscriptionService The service for managing subscription-related operations.
      */
     @Autowired
-    public SubscriptionController(SubscriptionService subscriptionService) {
+    public SubscriptionController(SubscriptionService subscriptionService, UserService userService) {
         this.subscriptionService = subscriptionService;
+        this.userService = userService;
     }
 
     /**
@@ -52,4 +57,60 @@ public class SubscriptionController {
         Optional<Subscription> subscription = subscriptionService.findSubscriptionById(id);
         return subscription.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    /**
+     * Create a new subscription for a specified user.
+     *
+     * @param subscriptionDto The subscription DTO to create Subscription Entity.
+     * @param userId          The ID of the user for whom the subscription is created.
+     * @return ResponseEntity containing the created subscription and HTTP status.
+     */
+    @PostMapping
+    public ResponseEntity<Subscription> createSubscription(@RequestBody CreateSubscriptionDto subscriptionDto, @RequestParam Long userId)
+    {
+        Optional<User> userOptional = userService.findUserById(userId);
+
+        if(userOptional.isPresent())
+        {
+            Subscription newSubscription = CreateSubscriptionDto
+                    .dtoToEntityMapper()
+                    .apply(subscriptionDto);
+
+            newSubscription.setUser(userOptional.get());
+
+            Subscription createdSubscription = subscriptionService.create(newSubscription);
+
+            if(createdSubscription!=null)
+            {
+                return new ResponseEntity<>(createdSubscription, HttpStatus.CREATED);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        else
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+    }
+    /**
+     * Update an existing subscription based on its ID.
+     *
+     * @param id                    The ID of the subscription to be updated.
+     * @param updatedSubscription    The updated subscription data.
+     * @return A ResponseEntity containing the updated subscription if successful, or a not found status if the subscription with the specified ID is not found.
+     */
+    @PatchMapping("/{id}")
+    public ResponseEntity<Subscription> updateSubscription(@PathVariable Long id, @RequestBody SubscriptionDTO updatedSubscription) {
+        Subscription updated = subscriptionService.updateSubscription(id, updatedSubscription);
+        if (updated != null) {
+            return ResponseEntity.ok(updated);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
 }

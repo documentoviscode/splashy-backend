@@ -1,21 +1,25 @@
 package org.documentoviscode.splashyapi.bootstrap;
 
+import lombok.RequiredArgsConstructor;
+import org.documentoviscode.splashyapi.config.DocFormat;
+import org.documentoviscode.splashyapi.domain.MonthlyReport;
+import org.documentoviscode.splashyapi.services.MonthlyReportService;
+import org.documentoviscode.splashyapi.services.UserService;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-@Component
-public class Bootstrap implements CommandLineRunner {
-    private final ApplicationContext applicationContext;
+import java.time.LocalDate;
 
-    public Bootstrap(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
+
+@Component
+@RequiredArgsConstructor
+public class Bootstrap implements CommandLineRunner {
+    private final UserService userService;
+    private final MonthlyReportService monthlyReportService;
+
     @Override
     public void run(String... args) throws Exception {
         System.out.println("Running bootstrap...");
-
-        // INSERT YOUR OBJECTS HERE
 
         System.out.println("Bootstrap has finished");
     }

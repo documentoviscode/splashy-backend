@@ -1,7 +1,11 @@
 package org.documentoviscode.splashyapi.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -48,4 +52,9 @@ public class MonthlyReport extends Document {
      */
     @Column
     private double donations;
+    /**
+     * The total amount of money made from views for the monthly report.
+     */
+    @Transient
+    private Double revenue;
 }
