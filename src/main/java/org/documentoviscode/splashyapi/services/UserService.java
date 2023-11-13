@@ -1,6 +1,7 @@
 package org.documentoviscode.splashyapi.services;
 
 
+import org.documentoviscode.splashyapi.domain.Document;
 import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,5 +63,25 @@ public class UserService {
      */
     public Optional<User> findAdminById(Long id) {
         return userRepository.findAdminById(id);
+    }
+
+    /**
+     * Associates a document with a user by adding it to the list of documents associated with that user.
+     *
+     * @param userId   The ID of the user to associate the document with.
+     * @param document The document to add to the user's documents.
+     * @throws IllegalArgumentException if the specified user is not found.
+     */
+    public void addDocumentToUser(Long userId, Document document) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        User user = userOptional.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+
+        List<Document> userDocuments = user.getDocuments();
+
+        if (!userDocuments.contains(document)) {
+            userDocuments.add(document);
+            user.setDocuments(userDocuments);
+            userRepository.save(user);
+        }
     }
 }
