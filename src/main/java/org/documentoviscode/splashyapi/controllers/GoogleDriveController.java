@@ -41,10 +41,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class GoogleDriveController {
@@ -168,6 +166,17 @@ public class GoogleDriveController {
 
         try {
             FileList fileList = drive.files().list().execute();
+
+            List<Document> allDocuments = documentService.findAll();
+            for (Document d : allDocuments) {
+                System.out.println(d);
+                System.out.println(d.getGDriveLink());
+            }
+            List<User> users = userService.findAll();
+            for (User u : users) {
+                System.out.println(u.getDocuments());
+            }
+
             return fileList;
         } catch (GoogleJsonResponseException e) {
             System.err.println("Unable to list files: " + e.getDetails());
@@ -196,35 +205,13 @@ public class GoogleDriveController {
                     .setFields("id")
                     .execute();
             System.out.println("File ID: " + uploadedFile.getId());
-            createDocumentForUser(userId, uploadedFile.getId(), determineDocFormat(mediaContent.getType()));
+            Document newDocument = documentService.create(userId, uploadedFile.getId(), determineDocFormat(mediaContent.getType()));
+            userService.addDocumentToUser(userId, newDocument);
             return uploadedFile.getId();
         } catch (GoogleJsonResponseException e) {
             System.err.println("Unable to upload file: " + e.getDetails());
             throw e;
         }
-    }
-
-    /**
-     * Creates a document for a specific user with the given parameters.
-     *
-     * @param userId   The ID of the user for whom the document is being created.
-     * @param GDriveId The Google Drive ID associated with the document.
-     * @param type     The format/type of the document.
-     * @throws IllegalArgumentException If the user with the provided ID is not found.
-     */
-    private void createDocumentForUser(Long userId, String GDriveId, DocFormat type) {
-        Optional<User> userOptional = userService.findUserById(userId);
-        User user = userOptional.orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
-
-        Document newDocument = Document.builder()
-                .type(type)
-                .GDriveLink(GDriveId)
-                .creationDate(LocalDate.now())
-                .user(user)
-                .build();
-
-        documentService.create(newDocument);
-        userService.addDocumentToUser(user, newDocument);
     }
 
     /**
