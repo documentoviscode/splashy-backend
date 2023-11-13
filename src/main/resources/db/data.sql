@@ -20,8 +20,8 @@ VALUES  (1,0,'<GLinkDrive1>','2023-10-29'),
 INSERT INTO Partnership_Contracts(id, type, GDrive_Link, creation_date,start_date,end_date,rate,donation_percentage, user_id)
 VALUES  (4, 0,'<GLinkDrive4>','2023-06-01','2023-06-01','2023-09-30',1.0,69, 2), --Alicja first contract
         (5, 0,'<GLinkDrive5>','2023-10-01','2023-10-01','2023-11-30',1.2,80, 2), --Alicja second contract
-        (6, 0,'<GLinkDrive6>','2023-06-01','2023-06-01','2023-11-30',0.9,10, 3), --Igor first contract
-        (7, 0,'<GLinkDrive7>','2023-06-01','2023-06-01','2023-11-30',1.1,99, 4); --Maja first contract
+        (6, 0,'<GLinkDrive6>','2023-09-01','2023-09-01','2023-09-30',0.9,10, 3), --Igor first contract
+        (7, 0,'<GLinkDrive7>','2023-10-01','2023-10-01','2023-11-30',1.1,99, 4); --Maja first contract
 
 /*
 INSERT INTO Additional_Packages(id, type, GDrive_Link, creation_date,package_type,price, user_id)
@@ -42,7 +42,7 @@ VALUES  (13,2,'<GLinkDrive13>','2023-06-01','2023-06-01','2023-06-30',231,3513,1
         (18,3,'<GLinkDrive18>','2023-06-01','2023-06-01','2023-06-30',5303,351513,2344, 3), --Igor June monthly report
         (19,3,'<GLinkDrive19>','2023-07-01','2023-07-01','2023-07-31',2321,531291,3421, 3), --Igor July monthly report
         (20,3,'<GLinkDrive20>','2023-08-01','2023-08-01','2023-08-30',12042,34141,5432, 3), --Igor August monthly report
-        (21,3,'<GLinkDrive21>','2023-09-01','2023-09-01','2023-09-30',20332,502532,9504, 3), --Igor September monthly report
+        (21,3,'1STUjf-kQrYZHXInrMMC7h_hpvXJYTg6X','2023-09-01','2023-09-01','2023-09-30',20332,502532,9504, 3), --Igor September monthly report
         (22,3,'<GLinkDrive22>','2023-10-01','2023-10-01','2023-10-31',35322,1232522.3,1002, 3), --Igor October monthly report
         (23,3,'<GLinkDrive23>','2023-06-01','2023-06-01','2023-06-30',152,6432.3,321, 4), --Maja June monthly report
         (24,3,'<GLinkDrive24>','2023-07-01','2023-07-01','2023-07-31',346,3531.2,142, 4), --Maja July monthly report

@@ -5,24 +5,24 @@ package org.documentoviscode.splashyapi.config;
  */
 public enum DocFormat {
     /**
-     * Portable Document Format (PDF).
-     */
-    PDF,
-
-    /**
      * Comma-Separated Values (CSV).
      */
     CSV,
 
     /**
-     * Microsoft Word Document (DOCX).
-     */
-    DOCX,
-
-    /**
      * JavaScript Object Notation (JSON).
      */
     JSON,
+
+    /**
+     * Portable Document Format (PDF).
+     */
+    PDF,
+
+    /**
+     * Microsoft Word Document (DOCX).
+     */
+    DOCX,
 
     /**
      * Extensible Markup Language (XML).
