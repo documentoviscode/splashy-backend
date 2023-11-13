@@ -84,7 +84,7 @@ public class DocumentConversionController{
         String downloadedFileName = "downloaded.json";
 
         String fileId = monthlyReportService.findMonthlyReportById(reportId).get().getGDriveLink();
-        if (fileId == null) fileId = generateMonthlyReport(reportId);
+        if (fileId == null || fileId.startsWith("<GLinkDrive")) fileId = generateMonthlyReport(reportId);
 
         File downloaded = new File(reportPath + downloadedFileName);
         try (FileOutputStream outputStream = new FileOutputStream(downloaded)) {
