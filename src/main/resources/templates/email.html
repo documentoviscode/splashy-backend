@@ -1,29 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Witaj mail</title>
     <style>
-#footer
-{
-    background-color: black;
-    color: darkgrey;
-    padding: 10px;
-}
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            color: #007BFF;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        b {
+            color: #007BFF;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .button-container {
+
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            font-family: 'Roboto', sans-serif;            font-size: 35px;
+            color: #00FFFF;
+            text-shadow: 0 0 5px #0000FF, 0 0 10px #0000CD;
+            display: inline-block;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin-right: 10px;
+            background-color: #888;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .button:hover {
+            background-color: #444;
+            color: #00CCFF;
+        }
+
+        #footer {
+            background-color: #333;
+            color: #999;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 100%;
+            height: auto;
+        }
 
     </style>
 </head>
 <body>
-    <h1>Witaj, <span th:text="${username}">name</span>!</h1>
-    Dziękujemy, że zakupił<span th:text="${sexEnd}">e(a)</span>ś <b><span th:text="${package}">package_name</span></b>! <br>
-    Całkowita wartość zamówienia: <b><span th:text="${price}"> 0.00</span> zł.</b>
-    <br>
-    <br>
-    <hr>
-    <div id="footer">
+<div style="max-width: 600px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
 
-        SplashyTV&copy; 2023
+    <div class="logo-container">
+        <img class="logo" src="http://drive.google.com/uc?export=view&id=1iCB7OwKyqypkXQ4gtsKtquw8UUsqCJQ0" alt="SplashyTV Logo" title="Logo" width="200" height="87">
     </div>
+
+    <h1>Witaj, <span th:text="${username}">name</span>!</h1>
+
+    <p>
+        Dziękujemy, że zakupił<span th:text="${sexEnd}">e(a)</span>ś pakiet <b><span th:text="${package}">package_name</span></b>! <br>
+        Całkowita wartość zamówienia: <b><span th:text="${price}"> 0.00</span> zł.</b>
+    </p>
+    
+    <p>
+        Bardzo cenimy Twoje zaufanie do naszej firmy. Jesteśmy dumni, że możemy dostarczyć Ci usługi najwyższej jakości.
+        Mamy nadzieję, że nasze usługi dostarczą Ci wiele radości.
+    </p>
+
+    <p th:if="${package == 'VIP+'}">
+        Wygląda na to, że możesz ulepszyć swój pakiet. Nie czekaj i zrób to teraz! Kliknij przycisk poniżej aby wejść na nowy poziom.
+    </p>
+
+    <div class="button-container">
+        <a th:if="${package == 'VIP+'}" href="https://documentovisco-app-ef4b24bd2dfe.herokuapp.com/buy_subscription" class="button">Ulepsz pakiet</a>
+    </div>
+
+    <p>
+        W załączeniu znajdziesz kopię Twojego zamówienia.
+    </p>
+
+    <hr>
+
+    <div id="footer">
+        SplashyTV&copy; 2023 <br>
+        ul. Laguna 6, 00-189, Warszawa, Polska
+    </div>
+</div>
 </body>
 </html>
-
