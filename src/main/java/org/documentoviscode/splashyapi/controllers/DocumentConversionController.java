@@ -1,8 +1,11 @@
 package org.documentoviscode.splashyapi.controllers;
 
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.documentoviscode.splashyapi.data.CustomMultipartFile;
@@ -12,19 +15,14 @@ import org.documentoviscode.splashyapi.domain.MonthlyReport;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.dto.CreateMonthlyReportDto;
-import org.documentoviscode.splashyapi.repositories.ClientRepository;
 import org.documentoviscode.splashyapi.services.*;
 import org.documentoviscode.splashyapi.utility.EmailService;
 import org.documentoviscode.splashyapi.utility.fileconversion.DataJSON;
-import org.docx4j.dml.chart.*;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
 import org.docx4j.model.table.TblFactory;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.openpackaging.parts.DrawingML.Chart;
-import org.docx4j.openpackaging.parts.PartName;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
-import org.docx4j.openpackaging.parts.WordprocessingML.EmbeddedPackagePart;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.wml.*;
 import org.docx4j.wml.ObjectFactory;
@@ -39,15 +37,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -63,8 +59,15 @@ public class DocumentConversionController{
     private final PartnershipContractService partnershipContractService;
     private final EmailService emailService;
     private final AdditionalPackageService additionalPackageService;
-    private final UserService userService;
     private final ClientService clientService;
+    private BaseFont helvetica;
+    private BaseFont verdana;
+
+    @PostConstruct
+    void loadFonts() throws DocumentException, IOException {
+        helvetica = BaseFont.createFont("src/main/resources/fonts/Helvetica.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED, true);
+        verdana = BaseFont.createFont("src/main/resources/fonts/Verdana.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED, true);
+    }
 
     private String generateMonthlyReport(Long reportId) throws Exception {
         MonthlyReport report = monthlyReportService.findMonthlyReportById(reportId).get();
@@ -133,13 +136,13 @@ public class DocumentConversionController{
         FileOutputStream outputStream = new FileOutputStream(reportPath + reportFileName);
         PdfWriter.getInstance(document, outputStream);
 
-        Font fontHeader1 = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 32, new BaseColor(68, 139, 187));
-        Font fontHeader2 = FontFactory.getFont(FontFactory.HELVETICA, 20f, 4, BaseColor.BLACK);
-        Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 16, BaseColor.BLACK);
-        Font fontTable = FontFactory.getFont("Verdana", 13, BaseColor.DARK_GRAY);
+        Font fontHeader1 = new Font(helvetica, 32, 1, new BaseColor(68, 139, 187));
+        Font fontHeader2 = new Font(helvetica, 20f, 4, BaseColor.BLACK);
+        Font fontNormal = new Font(helvetica, 16, 0, BaseColor.BLACK);
+        Font fontTable = new Font(verdana, 13, 0, BaseColor.DARK_GRAY);
         document.open();
 
-        Paragraph header = new Paragraph("Raport miesieczny partnera", fontHeader1);
+        Paragraph header = new Paragraph("Raport miesięczny partnera", fontHeader1);
         header.setAlignment(Element.ALIGN_CENTER);
         document.add(header);
         document.add(new Paragraph("\n"));
@@ -149,7 +152,7 @@ public class DocumentConversionController{
 
         document.add(new Paragraph("Dane partnera:", fontHeader2));
         fontNormal.isUnderlined();
-        document.add(new Paragraph("Imie: " + data.get("partnerName"), fontNormal));
+        document.add(new Paragraph("Imię: " + data.get("partnerName"), fontNormal));
         document.add(new Paragraph("Nazwisko: " + data.get("partnerSurname"), fontNormal));
         document.add(new Paragraph("E-mail: " + data.get("partnerEmail"), fontNormal));
         Paragraph p = new Paragraph("\n\nRozliczenie:\n\n", fontNormal);
@@ -160,17 +163,17 @@ public class DocumentConversionController{
         double rate = (double) data.get("rate");
         PdfPTable table = new PdfPTable(new float[]{0.7f, 0.3f});
         table.setPaddingTop(1);
-        table.addCell(new Phrase("Liczba ogladajacych", fontTable));
+        table.addCell(new Phrase("Liczba oglądających", fontTable));
         table.addCell(new Phrase(data.get("viewers").toString(), fontTable));
         table.addCell(new Phrase("Suma obejrzanych godzin", fontTable));
         table.addCell(new Phrase(data.get("hoursWatched").toString(), fontTable));
-        table.addCell(new Phrase("Stawka za godzine ogladalnosci", fontTable));
+        table.addCell(new Phrase("Stawka za godzinę ogladalności", fontTable));
         table.addCell(new Phrase(String.format("%.2f", rate) + " PLN", fontTable));
         table.addCell(new Phrase("Suma z dotacji", fontTable));
         table.addCell(new Phrase(String.format("%.2f", (double)data.get("donations")) + " PLN", fontTable));
         table.addCell(new Phrase("Procent z dotacji dla pracodawcy (" + (int)(donation_tax) + "%)", fontTable));
         table.addCell(new Phrase(String.format("%.2f", ((double )data.get("donations")) * donation_tax / 100) + " PLN", fontTable));
-        table.addCell(new Phrase("Calkowite wynagrodzenie", fontTable));
+        table.addCell(new Phrase("Całkowite wynagrodzenie", fontTable));
         double reward = ((double)data.get("donations")) * (1.0 - donation_tax / 100.0)
                 + ((double)data.get("hoursWatched")) * rate;
         table.addCell(new Phrase( String.format("%.2f", reward) + " PLN", fontTable));
@@ -209,11 +212,11 @@ public class DocumentConversionController{
         FileOutputStream outputStream = new FileOutputStream(fileName);
         PdfWriter.getInstance(document, outputStream);
 
-        Font fontHeader1 = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, BaseColor.BLACK);
-        Font fontHeader2 = FontFactory.getFont(FontFactory.HELVETICA, 16, 4, BaseColor.BLACK);
-        Font fontBig = FontFactory.getFont(FontFactory.HELVETICA, 14, BaseColor.BLACK);
-        Font fontNormal = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
-        Font fontTable = FontFactory.getFont("Verdana", 11, BaseColor.DARK_GRAY);
+        Font fontHeader1 = new Font(helvetica, 20, 1, BaseColor.BLACK);
+        Font fontHeader2 = new Font(helvetica, 16, 0, BaseColor.BLACK);
+        Font fontBig = new Font(helvetica, 14, 0, BaseColor.BLACK);
+        Font fontNormal = new Font(helvetica, 12, 0, BaseColor.BLACK);
+        Font fontTable = new Font(verdana, 11, 0, BaseColor.DARK_GRAY);
         document.open();
 
         document.add(new Paragraph("Faktura nr: " + packageId + "/2023", fontHeader1));
@@ -222,15 +225,30 @@ public class DocumentConversionController{
         document.add(new Paragraph("\n\n\n"));
 
         PdfPTable table = new PdfPTable(2);
-        table.addCell(new Phrase("Sprzedawca", fontHeader2));
-        table.addCell(new Phrase("Nabywca", fontHeader2));
-        table.addCell(new Paragraph("""
+        List<PdfPCell> cells = new ArrayList<>();
+        cells.add(new PdfPCell(new Phrase("Sprzedawca", fontHeader2)));
+        cells.get(0).setHorizontalAlignment(1);
+        cells.get(0).disableBorderSide(1);
+        cells.get(0).disableBorderSide(4);
+        cells.add(new PdfPCell(new Phrase("Nabywca", fontHeader2)));
+        cells.get(1).setHorizontalAlignment(1);
+        cells.get(1).disableBorderSide(1);
+        cells.get(1).disableBorderSide(8);
+        cells.add(new PdfPCell(new Paragraph("""
                 splashyTV sp. z o.o.
                 al. Grunwaldzka 420/69
                 80-888 Gdańsk
                 NIP 887-116-00-53
-                splashytv.net""", fontBig));
-        table.addCell(new Paragraph(user.getName() + "\n" + user.getSurname() + "\n" + user.getEmail(), fontBig));
+                splashytv.net""", fontBig)));
+        cells.get(2).setBorder(-1);
+        cells.get(2).enableBorderSide(8);
+        cells.add(new PdfPCell(new Paragraph(user.getName() + "\n" + user.getSurname() + "\n" + user.getEmail(), fontBig)));
+        cells.get(3).setBorder(-1);
+        cells.get(3).enableBorderSide(4);
+
+        for (PdfPCell c: cells) {
+            table.addCell(c);
+        }
         document.add(table);
         Paragraph p = new Paragraph("\n\n\n\nSposób zapłaty: karta płatnicza o nr **** **** **** " +
                 clientService.findClientById(user.getId()).get().getCreditCard().getNumber().substring(12)
@@ -240,34 +258,53 @@ public class DocumentConversionController{
 
         double price = addPackage.getPrice();
         double vat = 23.0 / 77.0;
-        table = new PdfPTable(6);
-        table.addCell(new Phrase("Nazwa usługi", fontTable));
-        table.addCell(new Phrase("Ilość", fontTable));
-        table.addCell(new Phrase("Cena netto", fontTable));
-        table.addCell(new Phrase("VAT %", fontTable));
-        table.addCell(new Phrase("Kwota VAT", fontTable));
-        table.addCell(new Phrase("Wartość brutto", fontTable));
+        table = new PdfPTable(new float[] {.25f, .12f, .17f, .12f, .17f, .17f});
+        BaseColor gray = new BaseColor(217, 217, 217);
 
-        table.addCell(new Phrase(addPackage.getPackageType(), fontTable));
-        table.addCell(new Phrase("1", fontTable));
-        table.addCell(new Phrase(String.format("%.2f", price) + " PLN", fontTable));
-        table.addCell(new Phrase("23 %", fontTable));
-        table.addCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable));
-        table.addCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable));
+        cells = new ArrayList<>();
+        cells.add(new PdfPCell(new Phrase("Nazwa usługi", fontTable)));
+        cells.add(new PdfPCell(new Phrase("Ilość", fontTable)));
+        cells.add(new PdfPCell(new Phrase("Cena netto", fontTable)));
+        cells.add(new PdfPCell(new Phrase("VAT %", fontTable)));
+        cells.add(new PdfPCell(new Phrase("Kwota VAT", fontTable)));
+        cells.add(new PdfPCell(new Phrase("Wartość brutto", fontTable)));
+        for (PdfPCell c: cells) {
+            c.setBackgroundColor(gray);
+        }
 
-        table.addCell("");
-        table.addCell("");
-        table.addCell(new Phrase("Razem:", fontTable));
-        table.addCell("");
-        table.addCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable));
-        table.addCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable));
+        cells.add(new PdfPCell(new Phrase(addPackage.getPackageType(), fontTable)));
+        cells.add(new PdfPCell(new Phrase("1", fontTable)));
+        cells.add(new PdfPCell(new Phrase(String.format("%.2f", price) + " PLN", fontTable)));
+        cells.add(new PdfPCell(new Phrase("23 %", fontTable)));
+        cells.add(new PdfPCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable)));
+        cells.add(new PdfPCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable)));
 
-        table.addCell("");
-        table.addCell("");
-        table.addCell(new Phrase("W tym:", fontTable));
-        table.addCell("23 %");
-        table.addCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable));
-        table.addCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable));
+        cells.add(new PdfPCell());
+        cells.get(12).setBorder(-1);
+        cells.add(new PdfPCell());
+        cells.get(13).setBorder(-1);
+        cells.add(new PdfPCell(new Phrase("Razem:", fontTable)));
+        cells.get(14).setBackgroundColor(gray);
+        cells.add(new PdfPCell());
+        cells.get(15).setBorder(-1);
+        cells.add(new PdfPCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable)));
+        cells.get(16).setBackgroundColor(gray);
+        cells.add(new PdfPCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable)));
+        cells.get(17).setBackgroundColor(gray);
+
+        cells.add(new PdfPCell());
+        cells.get(18).setBorder(-1);
+        cells.add(new PdfPCell());
+        cells.get(19).setBorder(-1);
+        cells.add(new PdfPCell(new Phrase("W tym:", fontTable)));
+        cells.add(new PdfPCell(new Phrase("23 %", fontTable)));
+        cells.get(21).disableBorderSide(1);
+        cells.add(new PdfPCell(new Phrase(String.format("%.2f", price * vat) + " PLN", fontTable)));
+        cells.add(new PdfPCell(new Phrase(String.format("%.2f", price * (1.0 + vat)) + " PLN", fontTable)));
+
+        for (PdfPCell c: cells) {
+            table.addCell(c);
+        }
 
         document.add(table);
         document.add(new Paragraph("\n\n\nRazem do zapłaty: " + String.format("%.2f", price * (1.0 + vat))
@@ -361,7 +398,7 @@ public class DocumentConversionController{
         mainDocumentPart.getContent().add(Chartparagraph);
 
         mainDocumentPart.addParagraphOfText("");
-        mainDocumentPart.addParagraphOfText("Documentovisco ©");
+        mainDocumentPart.addParagraphOfText("SplashyTV ©");
 
 
         File exportFile = new File(reportPath + reportFileName);
