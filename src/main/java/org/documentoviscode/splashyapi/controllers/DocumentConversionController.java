@@ -12,10 +12,8 @@ import org.documentoviscode.splashyapi.domain.MonthlyReport;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.User;
 import org.documentoviscode.splashyapi.dto.CreateMonthlyReportDto;
-import org.documentoviscode.splashyapi.services.AdditionalPackageService;
-import org.documentoviscode.splashyapi.services.MonthlyReportService;
-import org.documentoviscode.splashyapi.services.PartnershipContractService;
-import org.documentoviscode.splashyapi.services.UserService;
+import org.documentoviscode.splashyapi.repositories.ClientRepository;
+import org.documentoviscode.splashyapi.services.*;
 import org.documentoviscode.splashyapi.utility.EmailService;
 import org.documentoviscode.splashyapi.utility.fileconversion.DataJSON;
 import org.docx4j.dml.chart.*;
@@ -66,6 +64,7 @@ public class DocumentConversionController{
     private final EmailService emailService;
     private final AdditionalPackageService additionalPackageService;
     private final UserService userService;
+    private final ClientService clientService;
 
     private String generateMonthlyReport(Long reportId) throws Exception {
         MonthlyReport report = monthlyReportService.findMonthlyReportById(reportId).get();
@@ -233,7 +232,9 @@ public class DocumentConversionController{
                 splashytv.net""", fontBig));
         table.addCell(new Paragraph(user.getName() + "\n" + user.getSurname() + "\n" + user.getEmail(), fontBig));
         document.add(table);
-        Paragraph p = new Paragraph("\n\n\n\nSposób zapłaty: karta płatnicza o nr **** **** **** 1234\n\n", fontNormal);
+        Paragraph p = new Paragraph("\n\n\n\nSposób zapłaty: karta płatnicza o nr **** **** **** " +
+                clientService.findClientById(user.getId()).get().getCreditCard().getNumber().substring(12)
+                + "\n\n", fontNormal);
         p.setAlignment(Element.ALIGN_CENTER);
         document.add(p);
 
