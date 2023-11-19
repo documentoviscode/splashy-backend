@@ -30,6 +30,8 @@ public class CreateMonthlyReportDto {
 
     private double donations;
 
+    private Double revenue;
+
     public static Function<CreateMonthlyReportDto, MonthlyReport> dtoToEntityMapper()
     {
         return request -> MonthlyReport.builder()
@@ -41,6 +43,7 @@ public class CreateMonthlyReportDto {
                 .viewers(request.getViewers())
                 .hoursWatched(request.getHoursWatched())
                 .donations(request.getDonations())
+                .revenue(request.getRevenue())
                 .build();
     }
 }

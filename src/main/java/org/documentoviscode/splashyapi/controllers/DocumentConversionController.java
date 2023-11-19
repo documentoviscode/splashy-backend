@@ -11,37 +11,50 @@ import org.documentoviscode.splashyapi.domain.AdditionalPackage;
 import org.documentoviscode.splashyapi.domain.MonthlyReport;
 import org.documentoviscode.splashyapi.domain.PartnershipContract;
 import org.documentoviscode.splashyapi.domain.User;
+import org.documentoviscode.splashyapi.dto.CreateMonthlyReportDto;
 import org.documentoviscode.splashyapi.services.AdditionalPackageService;
 import org.documentoviscode.splashyapi.services.MonthlyReportService;
 import org.documentoviscode.splashyapi.services.PartnershipContractService;
 import org.documentoviscode.splashyapi.services.UserService;
 import org.documentoviscode.splashyapi.utility.EmailService;
 import org.documentoviscode.splashyapi.utility.fileconversion.DataJSON;
+import org.docx4j.dml.chart.*;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.jaxb.Context;
 import org.docx4j.model.table.TblFactory;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.DrawingML.Chart;
+import org.docx4j.openpackaging.parts.PartName;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
+import org.docx4j.openpackaging.parts.WordprocessingML.EmbeddedPackagePart;
 import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
 import org.docx4j.wml.*;
+import org.docx4j.wml.ObjectFactory;
 import org.json.simple.JSONObject;
+import org.knowm.xchart.BitmapEncoder;
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.XYChart;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 @RequiredArgsConstructor
@@ -61,7 +74,7 @@ public class DocumentConversionController{
         PartnershipContract contract = new PartnershipContract();
         for (org.documentoviscode.splashyapi.domain.Document d: report.getUser().getDocuments()) {
             Optional<PartnershipContract> c = partnershipContractService.findPartnershipContractById(d.getId());
-            if (c.isPresent() && c.get().getEndDate().equals(report.getEndDate())) {
+            if (c.isPresent() && !c.get().getEndDate().isBefore(report.getEndDate())) {
                 contract = c.get();
                 break;
             }
@@ -275,5 +288,115 @@ public class DocumentConversionController{
         emailService.sendInvoice("documentovisco@gmail.com", user.getName(),
                 addPackage.getPackageType(), String.format("%.2f", price * (1.0 + vat)), fileName);
         new File(fileName).delete();
+    }
+
+    @PostMapping(value = { "/monthlyReportCompany" })
+    public ResponseEntity<byte[]> generateCompanyMonthlyReport(@RequestBody CreateMonthlyReportDto request) throws Exception {
+        String reportPath = "src/main/resources/";
+
+        String reportFileName = "monthlyReport_" + request.getCreationDate() + ".docx";
+
+        WordprocessingMLPackage wordPackage = WordprocessingMLPackage.createPackage();
+        MainDocumentPart mainDocumentPart = wordPackage.getMainDocumentPart();
+
+        mainDocumentPart.addStyledParagraphOfText("Title", "Miesięczny Raport Firmowy");
+        mainDocumentPart.addParagraphOfText("Od: " + request.getStartDate());
+        mainDocumentPart.addParagraphOfText("Do: " + request.getEndDate());
+        mainDocumentPart.addParagraphOfText("");
+
+        ObjectFactory factory = Context.getWmlObjectFactory();
+        P p = factory.createP();
+        R r = factory.createR();
+        Text t = factory.createText();
+        r.getContent().add(t);
+        p.getContent().add(r);
+
+        int writableWidthTwips = wordPackage.getDocumentModel()
+                .getSections().get(0).getPageDimensions().getWritableWidthTwips();
+        int columnNumber = 2;
+        Tbl tbl = TblFactory.createTable(4, columnNumber, writableWidthTwips/columnNumber);
+        addCellContent(tbl, 0, 0, "Liczba unikalnych widzów");
+        addCellContent(tbl, 0, 1, Integer.toString(request.getViewers()));
+        addCellContent(tbl, 1, 0, "Suma godzin oglądalności");
+        addCellContent(tbl, 1, 1, String.format("%.1f", request.getHoursWatched()));
+        addCellContent(tbl, 2, 0, "Suma dotacji");
+        addCellContent(tbl, 2, 1, String.format("%.2f", request.getDonations()) + " zł");
+        addCellContent(tbl, 3, 0, "Zarobek za oglądalność");
+        addCellContent(tbl, 3, 1, String.format("%.2f", request.getRevenue()) + " zł");
+
+        mainDocumentPart.getContent().add(tbl);
+        mainDocumentPart.addParagraphOfText("");
+        mainDocumentPart.addParagraphOfText("");
+        mainDocumentPart.addParagraphOfText("");
+
+
+        java.util.List<Integer> xData = IntStream.rangeClosed(1, request.getEndDate().getDayOfMonth())
+                .boxed().collect(Collectors.toList());
+        Random rnd = new Random();
+        java.util.List<Double> yData = new java.util.ArrayList<>();
+        for (int i = 0; i < xData.size() - 1; ++i) {
+            yData.add(rnd.nextDouble() - .5);
+        }
+        double diff = yData.stream().reduce(0.0, Double::sum) / (xData.size() - 1);
+        for (int i = 0; i < xData.size() - 1; ++i) {
+            yData.set(i, (request.getRevenue() / xData.size() * (1.0 + yData.get(i)) - diff));
+            if (i > 0) yData.set(i, yData.get(i) + yData.get(i - 1));
+        }
+        yData.add(request.getRevenue());
+        System.out.println(yData);
+
+        XYChart chart = QuickChart.getChart("Raport na dzień " + request.getEndDate(), "Dzień", "zł", "Przychody", xData, yData);
+        BitmapEncoder.saveBitmapWithDPI(chart, "chart.jpg", BitmapEncoder.BitmapFormat.JPG, 300);
+
+
+        File imageChart = new File("chart.jpg");
+        byte[] chartContent = Files.readAllBytes(imageChart.toPath());
+        BinaryPartAbstractImage imagePartChart = BinaryPartAbstractImage
+                .createImagePart(wordPackage, chartContent);
+        Inline inlineChart = imagePartChart.createImageInline("", "", 1, 2,
+                wordPackage.getDocumentModel().getSections().get(0).getPageDimensions().getWritableWidthTwips(),
+                false);
+        P Chartparagraph = addImageToParagraph(inlineChart);
+        mainDocumentPart.getContent().add(Chartparagraph);
+
+        mainDocumentPart.addParagraphOfText("");
+        mainDocumentPart.addParagraphOfText("Documentovisco ©");
+
+
+        File exportFile = new File(reportPath + reportFileName);
+        wordPackage.save(exportFile);
+
+        byte[] fileContent = Files.readAllBytes(Path.of(reportPath + reportFileName));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(
+                MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+        headers.setContentDispositionFormData("attachment", reportFileName);
+
+        new File(reportPath + reportFileName).delete();
+        new File("chart.jpg").delete();
+        return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
+    }
+
+    private static void addCellContent(Tbl table, int row, int col, String value) {
+        ObjectFactory factory = Context.getWmlObjectFactory();
+        P p = factory.createP();
+        R r = factory.createR();
+        Text t = factory.createText();
+        t.setValue(value);
+        r.getContent().add(t);
+        p.getContent().add(r);
+
+        ((Tc)((Tr)table.getContent().get(row)).getContent().get(col)).getContent().add(p);
+    }
+
+    private static P addImageToParagraph(Inline inline) {
+        ObjectFactory factory = new ObjectFactory();
+        P p = factory.createP();
+        R r = factory.createR();
+        p.getContent().add(r);
+        Drawing drawing = factory.createDrawing();
+        r.getContent().add(drawing);
+        drawing.getAnchorOrInline().add(inline);
+        return p;
     }
 }
